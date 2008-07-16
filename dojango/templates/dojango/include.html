@@ -1,0 +1,30 @@
+{% load dojango_base %}
+{# where should we set the context? #}
+{% set_dojango_context %}
+{% load dojango_filters %}
+
+<script type="text/javascript">
+    {# baseUrl setting is needed, if you want to combine a local with a remote build! #}
+	var djConfig = {
+		'isDebug':{{ DOJANGO.DEBUG|json }},
+		'parseOnLoad':true,
+		'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+	};
+	{# needed by dojango.registerModulePath (see dojango.js) #}
+	var dojangoConfig = {
+		'baseUrl':"{{ DOJANGO.BASE_MEDIA_URL }}",
+		'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
+	};
+</script>
+{% block dojango_post_dj_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
+{% block post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
+<script type="text/javascript" src="{{ DOJANGO.DOJO_SRC_FILE }}">
+</script>
+{# for a local builded version dojango should already be included #}
+{% if not DOJANGO.IS_LOCAL_BUILD %}
+    <script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
+{% endif %}
+<style type="text/css">
+    @import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+    @Import "{{ DOJANGO.THEME_CSS_URL }}";
+</style>

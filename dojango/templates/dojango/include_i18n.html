@@ -1,0 +1,14 @@
+{% extends "dojango/include.html" %}
+{% load dojango_filters %}
+
+{% load dojango_base %}
+{% if not LANGUAGE_CODE %}
+    {% load i18n %}
+    {% get_current_language as LANGUAGE_CODE %}
+{% endif %}
+
+{% block dojango_post_dj_config %}
+<script type="text/javascript">
+    djConfig['locale'] = "{{ LANGUAGE_CODE }}";
+</script>
+{% endblock %}

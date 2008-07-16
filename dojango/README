@@ -1,0 +1,372 @@
+Introduction
+============
+
+Dojango is a reusable django application that helps you to use the client-side
+framework dojo within your django project. It provides capabilites to easily 
+switch between several dojo versions and sources (e.g. aol, google, local) and 
+delivers helping utilities, that makes the development of rich internet 
+applications in combination with dojo more comfortable. Also it makes the building 
+of your own packed dojo release easier. Another goal of this project is, that you 
+can learn how you have to structure your html to use dojo within your projects.
+
+
+Start your first dojango driven django project
+==============================================
+
+This section describes, how you integrate dojango on the basis of a newly 
+created django project. Django with at least version >= 0.96.2 must be installed
+before to run dojango successfully. Details how you install django can be found 
+here::
+
+    http://www.djangoproject.com/download/
+    http://www.djangoproject.com/documentation/install/
+
+Start an empty project
+----------------------
+
+Type the following on your console to create an empty django project::
+
+    django-admin.py startproject mysite
+
+Add dojango as app to your project
+----------------------------------
+
+Download the dojango-xxx.tar.gz from the google code page and place it in
+your previously created django project directory and extract it there::
+
+    1. cd [mysite project directory]
+    2. tar xzvf dojango-xxx.tar.gz
+
+You could also use an actual subversion checkout from::
+
+    http://svn.googlecode..........
+
+and place it in your [mysite project directory].
+
+After that you can enable the dojango app by defining the following in your 
+project's settings file ([mysite project directory]/settings.py)::
+
+    INSTALLED_APPS = (
+        ...
+        'dojango',
+    )
+    
+Enable the dojango URLs
+-----------------------
+    
+To deliver the media files you also have to add the URL definitions of dojango
+to your main URL defintion file ([mysite project directory]/urls.py)::
+
+    urlpatterns = patterns('',
+        ...
+        (r'^dojango/', include('dojango.urls')),
+    )
+    
+Consider, that if you want to set a different base pattern than ''dojango'', you
+should also modify the DOJANGO_BASE_MEDIA_URL setting.
+    
+Now you are ready to start your django server::
+
+    ./manage.py runserver
+
+Open the dojango test page::
+
+    http://localhost:8000/dojango/test/
+
+And enjoy dojo :-)
+
+
+Using dojo in your django pages
+===============================
+
+After setting up dojango for your django project, it is now time to create your
+first own dojo-driven page.
+
+First you need your own app within our django project, so we create it::
+
+	cd [mysite project directory]
+	./manage.py startapp myapp
+	
+And add it to our INSTALLED_APPS. Open your project's settings file 
+([mysite project directory]/settings.py) and add your new app::
+
+    INSTALLED_APPS = (
+        ...
+        'myapp',
+    )
+
+You also need a template folder for your templates::
+
+    mkdir [mysite project directory]/myapp/templates
+    # creating a sub-directory with your appname is recommended
+    mkdir [mysite project directory]/myapp/templates/myapp
+    
+Open [mysite project directory]/myapp/views.py and add the following lines::
+
+    from django.shortcuts import render_to_response
+    from django.template import loader, Context, RequestContext
+
+    def first_page(request):
+        return render_to_response("myapp/my_first_page.html", context_instance=RequestContext(request))
+        
+Now map this view within your [mysite project directory]/urls.py. Add the following
+url to your urlpatterns::
+
+    (r'^my-first-page/$', 'myapp.views.first_page'),
+    
+And finally create the html template [mysite project directory]/myapp/templates/myapp/my_first_page.html
+with the following content::
+
+    {% extends "dojango/base.html" %}
+    
+    {% block dojango_header_extra %}
+	    <style type="text/css">
+		    .box {
+		      margin-top: 10px;
+		      color: #292929;
+		      width: 300px;
+		      border: 1px solid #BABABA;
+		      background-color: #ddd;
+		      padding-left: 10px;
+		      padding-right: 10px;
+		      margin-left: 10px;
+		      margin-bottom: 1em;
+		      -o-border-radius: 10px;
+		      -moz-border-radius: 12px;
+		      -webkit-border-radius: 10px;
+		      -webkit-box-shadow: 0px 3px 7px #adadad;
+		      border-radius: 10px;
+		      -moz-box-sizing: border-box;
+		      -opera-sizing: border-box;
+		      -webkit-box-sizing: border-box;
+		      -khtml-box-sizing: border-box;
+		      box-sizing: border-box;
+		      overflow: hidden;
+		    }
+		</style>
+		<script type="text/javascript">
+		    // load the modules you need on the page!
+			dojo.require("dijit.form.Button");
+		    var textBigger, textSmaller;
+		    // just access your dom after everything is loaded!
+			dojo.addOnLoad(function(){
+				// defining some animations
+				textBigger = dojo.animateProperty(
+			    {
+			      node: "animDiv",duration: 1000,
+			      properties: {
+			        fontSize: {end: 25, unit: "px"}
+			      }
+			    });
+			
+			    textSmaller = dojo.animateProperty(
+			    {
+			      node: "animDiv",duration: 1000,
+			      properties: {
+			        fontSize: {end: 10, unit: "px"}
+			      }
+			    });
+			);
+		</script>
+	{% endblock %}
+    {% block dojango_content %}
+    	<button dojoType="dijit.form.Button" onClick="textBigger.play();">Text Embiggen</button>
+		<button dojoType="dijit.form.Button" onClick="textSmaller.play();">Text UnEmbiggen</button>
+	    <div id="animDiv" class="box">
+			<p>
+			Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean
+			semper sagittis velit. Cras in mi. Duis porta mauris ut ligula.
+			Proin porta rutrum lacus. Etiam consequat scelerisque quam. Nulla
+			facilisi.  Maecenas luctus venenatis nulla. In sit amet dui non mi
+			semper iaculis.  Sed molestie tortor at ipsum. Morbi dictum rutrum
+			magna. Sed vitae risus.
+			</p>
+		</div>
+	{% endblock %}
+	
+Now you can startup your server::
+
+    ./manage.py runserver
+
+And visit the following URL::
+
+    http://localhost:8000/my-first-page/
+    
+This was just a simple example how dojo can be used on the frontend side. More examples how you
+can enhance your django application with dojo and how you feed your dojo with the rich
+internet backend django will follow soon.
+    
+    
+Configuration of dojango
+========================
+
+Dojango was designed to get started very fast, but you also have the power to configure
+everything on your own (just if you really want to :-)). All the definitions below
+can be set in your project's ''settings.py'' file::
+
+DOJANGO_DOJO_PROFILE (default "aol")
+
+    Sets the dojango profile, that should be used within the dojango context. Possible values::
+    
+        * "aol" (default)
+        * "aol_uncompressed"
+        * "aol_gfx"
+        * "aol_gfx_uncompressed"
+        * "google"
+        * "google_uncompressed"
+        * "local"
+        * "local_release"
+        * "local_release_uncompressed"
+
+DOJANGO_DOJO_VERSION (default "1.1.1")
+
+    This setting defines the dojo version that should be used within dojango. For the local 
+    version you can pass in any value, because dojango tries to get a local version from 
+    the following directory::
+        
+        [mysite project directory]/dojango/media/dojo/[DOJANGO_DOJO_VERSION]
+        
+    At the moment dojango is packed with dojo version 1.1.1 so that a local build process
+    is possible out-of-the-box.
+    
+    All other external (crossdomain builds) just provide the following versions::
+    
+    	* "1.1.1" - available in profile: aol*, google*
+    	* "1.1.0" - available in profile: aol*
+    	* "1.0.2" - available in profile: aol*
+        * "1.0.0" - available in profile: aol*
+        * "0.9.0" - available in profile: aol*
+
+DOJANGO_DOJO_PROFILES
+
+    With this setting you can extend the default list of profiles delivered with 
+    dojango (see above). Loot at ''conf/settings.py'' on how to define your own 
+    profile.
+
+DOJANGO_DOJO_THEME (default: "tundra")
+
+    Here you can define the dojo theme, that should be used. Possible values::
+    
+        * "tundra"
+        * "soria"
+        * "nihilo"
+
+DOJANGO_DOJO_THEME_URL (defaults to the dijit theme URL)
+
+    You can set your own theme base URL. It defaults to [dojo base url]/dijit/themes
+    and there you can look at the dojo theme structure, e.g.::
+    
+        [dojo base url]/dijit/themes/tundra
+        [dojo base url]/dijit/themes/tundra/tundra.css
+        ...
+
+DOJANGO_DOJO_DEBUG (default: settings.DEBUG)
+
+    Turning dojo into debug mode. The standard is using the DEBUG setting of your
+    django project. Possible values::
+    
+        * True
+        * False
+        
+Several advanced settings for some URLs and paths
+-------------------------------------------------
+
+Be careful if you modify the following settings. You really should know what you
+are doing, if you are changing these.
+
+DOJANGO_BASE_MEDIA_URL (default: ''/dojango/media'')
+     
+     This sets the absolute URL to the media files of dojango. All dojo files 
+     reside below that.
+
+DOJANGO_BUILD_MEDIA_URL (default: DOJANGO_BASE_MEDIA_URL + "/release")
+
+     What is the base url when the dojango profile "local_release" is used? A builded
+     release will be available there in a directory with the name of the builded version. 
+     See ''Settings for building your own dojo profile'' for details about building 
+     dojo releases. 
+     
+DOJANGO_BASE_MEDIA_ROOT (default: [mysite project directory]/dojango/media)
+
+	With this setting you can define the absolute path to the media files of dojango.
+	You have to change that, if you want to modify the dojo build system.
+
+DOJANGO_BASE_DOJO_ROOT (default: DOJANGO_BASE_MEDIA_ROOT + "/dojo")
+
+    Like DOJANGO_BASE_MEDIA_ROOT, but defining the absolute base path to the media
+    files of dojo.
+
+Settings for building your own dojo profile
+-------------------------------------------
+
+You can optimize the performance of your web application if you use the dojo build 
+system. It compresses your source code by removing comments and whitespace and by replacing
+your identifiers with shorter ones. You can also combine several dojo files into a single
+one. Dojango makes the building of a packed release a really simple task; for that the 
+manage command of django was extended and you now can do an easy::
+
+    ./manage.py dojobuild
+    
+If you call this command, a dojo release will be created in the following directory:
+
+    [mysite project directory]/dojango/media/release/[DOJANGO_DOJO_BUILD_VERSION]
+
+After your first build you can use that release within your project by defining the 
+following in your project's setting file::
+
+    DOJANGO_DOJO_PROFILE = "local_release"
+    # for details see:
+    #     * commandline option --build_version
+    #     * project setting DOJANGO_DOJO_BUILD_VERSION
+    DOJANGO_DOJO_VERSION = "your-builded-dojo-version"
+    
+This command also has several parameters you can use to manipulate the build. With 
+appending a dojo build profile name to this command, an other build profile, that is 
+defined in the DOJANGO_DOJO_BUILD_PROFILES setting will be used instead of the 
+default one ("dojango")::
+
+    ./manage.py dojobuild dojango_optimized
+
+A version name for the builded release also could be defined on the commandline like 
+that:
+
+    ./manage.py dojobuild --build_version=mysite1.1.1
+    
+There is also a switch to do a dojo mini build. A mini build is a dojo build, where
+unescessary files, like tests/templates/demos are removed. You can create a dojo mini
+release with dojango by appending ''--minify'' to the dojobuild command::
+
+    ./manage.py dojobuild --minify
+    
+With the following settings you can manipulate the behavior of the build system
+within your project's settings file::
+
+DOJANGO_DOJO_BUILD_PROFILE (default: "dojango")
+
+    Dojango provides two example build profiles that you can use immediately.
+    Possible values::
+    
+        * "dojango"
+        * "dojango_optimized"
+
+DOJANGO_DOJO_BUILD_VERSION (default: "1.1.1")
+
+    What is the version name of the builded dojo release? You can define any string 
+    value for that. A recommendation is to name your release with the dojo version and 
+    a prepended project name. Something like ''mysite1.1.1''.
+    
+DOJANGO_DOJO_BUILD_PROFILES
+
+    You can add your own build profile to dojango with this setting. For details, 
+    how to define your own build profile, look at ''conf/settings.py''.
+    
+    Available build profiles::
+    
+        * dojango
+        * dojango_optimized
+
+DOJANGO_DOJO_BUILD_JAVA_EXEC (default: "java")
+
+    What is the commandline call for java? This is needed, if you want to build 
+    your own dojo release. On some systems you have to set the whole path to the 
+    java executable.
