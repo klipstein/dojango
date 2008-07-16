@@ -5,7 +5,7 @@ DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 
 DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.1.1")
-DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "local_release")
+DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "aol")
 
 BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/media')
 BUILD_MEDIA_URL = getattr(settings, "DOJANGO_BUILD_MEDIA_URL", '%s/release' % BASE_MEDIA_URL)
