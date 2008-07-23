@@ -1,7 +1,11 @@
 {% load dojango_base %}
-{# where should we set the context? #}
-{% set_dojango_context %}
 {% load dojango_filters %}
+{# where should we set the context? #}
+{% if not DOJANGO %}
+	{# if the context processor did not pass the DOJANGO context, we set it here #}
+	{% set_dojango_context %}
+{% endif %}
+
 
 <script type="text/javascript">
     {# baseUrl setting is needed, if you want to combine a local with a remote build! #}
@@ -16,8 +20,8 @@
 		'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
 	};
 </script>
-{% block dojango_post_dj_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
-{% block post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
+{% block _dojango_post_dj_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
+{% block dojango_post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
 <script type="text/javascript" src="{{ DOJANGO.DOJO_SRC_FILE }}">
 </script>
 {# for a local builded version dojango should already be included #}

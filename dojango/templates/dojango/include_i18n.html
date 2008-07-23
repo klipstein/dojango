@@ -7,7 +7,7 @@
     {% get_current_language as LANGUAGE_CODE %}
 {% endif %}
 
-{% block dojango_post_dj_config %}
+{% block _dojango_post_dj_config %}
 <script type="text/javascript">
     djConfig['locale'] = "{{ LANGUAGE_CODE }}";
 </script>
