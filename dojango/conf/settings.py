@@ -35,9 +35,9 @@ DOJO_PROFILES = {
     'aol_uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_aol_versions},
     'aol_gfx': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'versions':_aol_versions},
     'aol_gfx-uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'uncompressed':True, 'versions':_aol_versions},
-    'local': {'base_url':BASE_MEDIA_URL + '/dojo', 'is_local':True}, # we don't have a restriction on versions
-    'local_release': {'base_url':BUILD_MEDIA_URL, 'is_local':True, 'is_local_build':True}, # this will be available after the first dojo build!
-    'local_release_uncompressed': {'base_url': BUILD_MEDIA_URL, 'uncompressed':True, 'is_local':True, 'is_local_build':True} # same here
+    'local': {'base_url': '%(BASE_MEDIA_URL)s/dojo', 'is_local':True}, # we don't have a restriction on versions
+    'local_release': {'base_url': '%(BUILD_MEDIA_URL)s', 'is_local':True, 'is_local_build':True}, # this will be available after the first dojo build!
+    'local_release_uncompressed': {'base_url': '%(BUILD_MEDIA_URL)s', 'uncompressed':True, 'is_local':True, 'is_local_build':True} # same here
 }
 
 # we just want users to append/overwrite own profiles
@@ -55,23 +55,33 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 # This dictionary defines your build profiles you can use within the custom command "./manage.py dojobuild
 # You can set your own build profile within the main settings.py of the project by defining a dictionary
 # DOJANGO_DOJO_BUILD_PROFILES, that sets the following key/value pairs for each defined profile name:
+#   profile_file: which dojo profile file is used for the build (see dojango.profile.js how it must look like)
+#   options: these are the options that are passed to the build command (see the dojo doc for details)
+#   OPTIONAL SETTINGS (see DOJO_BUILD_PROFILES_DEFAULT):
 #   base_root: in which directory will the dojo version be builded to? 
 #   used_src_version: which version should be used for the dojo build (e.g. 1.1.1)
 #   build_version: what is the version name of the builded release (e.g. dojango1.1.1) - this option can be overwritten by the commandline parameter --build_version=...
-#   profile_file: which dojo profile file is used for the build (see dojango.profile.js how it must look like)
-#   options: these are the options that are passed to the build command (see the dojo doc for details)
 DOJO_BUILD_PROFILES = {
-    'dojango': {'base_root': '%s/release' % BASE_MEDIA_ROOT, # build the release in the media directory of dojango
-                'used_src_version': DOJO_BUILD_VERSION,
-                'build_version': DOJO_BUILD_VERSION,
-                'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango.profile.js'),
-                'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'},
-    'dojango_optimized': {'base_root': '%s/release' % BASE_MEDIA_ROOT, # build the release in the media directory of dojango
-                'used_src_version': DOJO_BUILD_VERSION,
-                'build_version': DOJO_BUILD_VERSION,
-                'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango_optimized.profile.js'),
-                'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'},
+    'dojango': {
+        'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango.profile.js'),
+        'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
+    },
+    'dojango_optimized': {
+        'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango_optimized.profile.js'),
+        'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
+    },
 }
+
+# these defaults are mixed into each DOJO_BUILD_PROFILES element
+# but you can overwrite each attribute within your own build profile element
+# e.g. DOJANGO_BUILD_PROFILES = {'used_src_version': '1.2.2', ....}
+DOJO_BUILD_PROFILES_DEFAULT = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES_DEFAULT", {
+    # build the release in the media directory of dojango
+    # use a formatting string, so this can be set in the project's settings.py without getting the dojango settings
+    'base_root': '%(BASE_MEDIA_ROOT)s/release',
+    'used_src_version': '%(DOJO_BUILD_VERSION)s',
+    'build_version': '%(DOJO_BUILD_VERSION)s',
+})
 # TODO: we should also enable the already pre-delivered dojo default profiles
 
 # you can add/overwrite your own build profiles

@@ -41,15 +41,16 @@ class Command(BaseCommand):
         else:
             profile_name = args[0]
         profile = self._get_profile(profile_name)
+        used_src_version = profile['used_src_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         profile_file = os.path.basename(profile['profile_file'])
         self.dojo_base_dir = "%(dojo_root)s/%(version)s" % \
                              {'dojo_root':settings.BASE_DOJO_ROOT, 
-                             'version':profile['used_src_version']}
+                             'version':used_src_version}
         # does the defined dojo-directory exist?
         util_base_dir = "%(dojo_base_dir)s/util" % {'dojo_base_dir':self.dojo_base_dir}
         if not os.path.exists(util_base_dir):
             raise CommandError('Put the the dojo source files (version \'%(version)s\') in the folder \'%(folder)s/%(version)s\'' % \
-                               {'version':profile['used_src_version'],
+                               {'version':used_src_version,
                                 'folder':settings.BASE_DOJO_ROOT})
         # check, if java is installed
         stdin, stdout, stderr = os.popen3(settings.DOJO_BUILD_JAVA_EXEC)
@@ -65,10 +66,11 @@ class Command(BaseCommand):
         # use the passed version for building
         version = options.get('build_version', None)
         if not version:
-            version = profile['build_version']
+            # if no option --build_version was passed, we use the default build version
+            version = profile['build_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         # we add the version to our destination base path
         self.dojo_release_dir = '%(base_path)s/%(version)s' % {
-                          'base_path':profile['base_root'],
+                          'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT}, # we don't want to have a dependancy to the project's settings file!
                           'version':version}
         # setting up the build command
         exe_command = 'cd %(buildscript_dir)s && %(executable)s version=%(version)s releaseName="" releaseDir=%(release_dir)s %(options)s' % \
@@ -88,9 +90,12 @@ class Command(BaseCommand):
         os.remove(dest_profile_file) # remove the copied profile file
         
     def _get_profile(self, name):
+        default_profile_settings = settings.DOJO_BUILD_PROFILES_DEFAULT
         try:
             profile = settings.DOJO_BUILD_PROFILES[name]
-            return profile
+            # mixing in the default settings for the build profiles!
+            default_profile_settings.update(profile)
+            return default_profile_settings
         except KeyError:
             raise CommandError('The profile \'%s\' does not exist in DOJO_BUILD_PROFILES' % name)
         

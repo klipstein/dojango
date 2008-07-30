@@ -28,8 +28,12 @@ class Config:
         # if no version is set you are free to use your own
         if self.config == None or not self.version in self.config.get('versions', (self.version)):
             return None
+        # so we simply append our own profile without importing the dojango settings.py to the project's settings.py
+        config_base_url = self.config.get('base_url', '') % \
+                          {'BASE_MEDIA_URL':settings.BASE_MEDIA_URL,
+                           'BUILD_MEDIA_URL':settings.BUILD_MEDIA_URL}
         # and putting the complete url together
-        return "%(base)s/%(version)s" % {"base":self.config.get('base_url', ''), 
+        return "%(base)s/%(version)s" % {"base":config_base_url, 
             "version":self.version}
         
     def get_context_dict(self):
@@ -103,10 +107,10 @@ class Config:
         If we use an external build it must be '/' and for a local version, we just have to set the
         path to the dojo path.
         '''
-        base_url = "/"
+        base_path = "/"
         if self.config.get('is_local', False):
-            base_url = "%s/dojo/" % self.dojo_base_url # last slash is needed
-        return base_url
+            base_path = "%s/dojo/" % self.dojo_base_url # last slash is needed
+        return base_path
     
     def theme_css_url(self):
         '''Like the "dojango_dojo_src_file" templatetag, but returning the theme css path. It uses the
