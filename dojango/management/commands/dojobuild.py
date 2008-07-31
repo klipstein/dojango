@@ -42,7 +42,7 @@ class Command(BaseCommand):
             profile_name = args[0]
         profile = self._get_profile(profile_name)
         used_src_version = profile['used_src_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
-        profile_file = os.path.basename(profile['profile_file'])
+        profile_file = os.path.basename(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT})
         self.dojo_base_dir = "%(dojo_root)s/%(version)s" % \
                              {'dojo_root':settings.BASE_DOJO_ROOT, 
                              'version':used_src_version}
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         dest_profile_file = util_base_dir + "/buildscripts/profiles/%(profile_file)s" % \
                             {'profile_file':profile_file}
         # copy the profile to the 
-        shutil.copyfile(profile['profile_file'], dest_profile_file)
+        shutil.copyfile(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT}, dest_profile_file)
         buildscript_dir = os.path.abspath('%s/buildscripts' % util_base_dir)
         executable = '%(java_exec)s -jar ../shrinksafe/custom_rhino.jar build.js' % \
                      {'java_exec':settings.DOJO_BUILD_JAVA_EXEC}

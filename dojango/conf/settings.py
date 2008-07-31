@@ -63,11 +63,11 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 #   build_version: what is the version name of the builded release (e.g. dojango1.1.1) - this option can be overwritten by the commandline parameter --build_version=...
 DOJO_BUILD_PROFILES = {
     'dojango': {
-        'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango.profile.js'),
+        'profile_file': '%(BASE_MEDIA_ROOT)s/dojango.profile.js',
         'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
     },
     'dojango_optimized': {
-        'profile_file': os.path.abspath(os.path.dirname(__file__)+'/../media/dojango_optimized.profile.js'),
+        'profile_file': '%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js',
         'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
     },
 }
