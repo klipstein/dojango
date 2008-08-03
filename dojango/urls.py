@@ -13,5 +13,5 @@ if settings.DEBUG:
     # serving the media files for dojango / dojo (js/css/...)
     urlpatterns += patterns('',
         (r'^media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(os.path.dirname(__file__), "media")}),
+            {'document_root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'media'))}),
     )

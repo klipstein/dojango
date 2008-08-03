@@ -3,13 +3,13 @@ dependencies = {
 		{
 			name: "dojo.js",
 			dependencies: [
-                "dojango.dojango",
-                "dojo.parser"
+				"dojango.dojango",
+				"dojo.parser"
 			]
 		}
 	],
-    
-    prefixes: [
+	
+	prefixes: [
 		[ "dijit", "../dijit" ],
 		[ "dojox", "../dojox" ],
 		[ "dojango", "../../../dojango" ] // relative to the directory, where the dojo.js source file resides

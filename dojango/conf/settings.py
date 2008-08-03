@@ -68,7 +68,8 @@ DOJO_BUILD_PROFILES = {
     },
     'dojango_optimized': {
         'profile_file': '%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js',
-        'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
+        'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
+        'build_version': 'dojango-optimized-with-dojo%(DOJO_BUILD_VERSION)s',
     },
 }
 
@@ -80,7 +81,7 @@ DOJO_BUILD_PROFILES_DEFAULT = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES_DEF
     # use a formatting string, so this can be set in the project's settings.py without getting the dojango settings
     'base_root': '%(BASE_MEDIA_ROOT)s/release',
     'used_src_version': '%(DOJO_BUILD_VERSION)s',
-    'build_version': '%(DOJO_BUILD_VERSION)s',
+    'build_version': 'dojango-with-dojo%(DOJO_BUILD_VERSION)s',
 })
 # TODO: we should also enable the already pre-delivered dojo default profiles
 

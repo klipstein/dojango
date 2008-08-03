@@ -13,49 +13,59 @@
 	{% endif %}
 {% endspaceless %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"{% block _dojango_html_lang %}{% endblock %}>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />{# This must be before any non-english text, i.e. title. http://www.dojotoolkit.org/book/dojo-book-0-9/part-3-programmatic-dijit-and-dojo/i18n/globalization-guidelines/encoding-guideli#textfiles #}
-	{% block _dojango_meta_lang %}{% endblock %}
-	<title>{% block dojango_page_title %}{% endblock %}</title>
-	<script type="text/javascript">
-		{# baseUrl setting is needed, if you want to combine a local with a remote build! #}
-		{% block _dojango_dj_config %}
-			var djConfig = {
-				'isDebug':{{ DOJANGO.DEBUG|json }},
-				'parseOnLoad':true,
-				'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+{% spaceless %}
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />{# This must be before any non-english text, i.e. title. http://www.dojotoolkit.org/book/dojo-book-0-9/part-3-programmatic-dijit-and-dojo/i18n/globalization-guidelines/encoding-guideli#textfiles #}
+		{% block _dojango_meta_lang %}{% endblock %}
+		<title>{% block dojango_page_title %}{% endblock %}</title>
+		<script type="text/javascript">
+		
+			{# baseUrl setting is needed, if you want to combine a local with a remote build! #}
+			{% block _dojango_dj_config %}
+				var djConfig = {
+					'isDebug':{{ DOJANGO.DEBUG|json }},
+					'parseOnLoad':true,
+					'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+				};
+			{% endblock %}
+			
+			{# needed by dojango.registerModulePath (see dojango.js) #}
+			{% block _dojango_dojango_config %}
+			var dojangoConfig = {
+				'baseUrl':"{{ DOJANGO.BASE_MEDIA_URL }}",
+				'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
 			};
-		{% endblock %}
-		{# needed by dojango.registerModulePath (see dojango.js) #}
-		{% block _dojango_dojango_config %}
-		var dojangoConfig = {
-			'baseUrl':"{{ DOJANGO.BASE_MEDIA_URL }}",
-			'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
-		};
-		{% endblock %}
-	</script>
-	{% block _dojango_post_dj_config %}{# don't use this block, it is used by base_i18n.html #}{% endblock %}
-	{% block dojango_post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
-	<script type="text/javascript" src="{{ DOJANGO.DOJO_SRC_FILE }}">
-	</script>
-	{# for a local builded version dojango should already be included #}
-	{% if not DOJANGO.IS_LOCAL_BUILD %}
-		<script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
-	{% endif %}
+			{% endblock %}
+			
+		</script>
 	
-	{% block _dojango_dojo_styles %}
-		<style type="text/css">
-			@import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
-			@Import "{{ DOJANGO.THEME_CSS_URL }}";
-		</style>
-	{% endblock %}
+		{% block _dojango_post_dj_config %}{# don't use this block, it is used by base_i18n.html #}{% endblock %}
+		
+		{% block dojango_post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
+		
+		<script type="text/javascript" src="{{ DOJANGO.DOJO_SRC_FILE }}"></script>
+	
+		{# for a locally built version dojango should already be included #}
+		{% if not DOJANGO.IS_LOCAL_BUILD %}
+			<script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
+		{% endif %}
+		
+		{% block _dojango_dojo_styles %}
+			<style type="text/css">
+				@import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+				@import "{{ DOJANGO.THEME_CSS_URL }}";
+			</style>
+		{% endblock %}
+	
+		{% block dojango_header_extra %}{% endblock %}
+	</head>
+{% endspaceless %}
 
-	{% block dojango_header_extra %}{% endblock %}
-</head>
 {% block dojango_body %}
 	<body class="{{ DOJANGO.THEME }}">
 		{% block dojango_content %}
 		{% endblock %}
 	</body>
 {% endblock %}
+
 </html>
