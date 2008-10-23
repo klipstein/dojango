@@ -26,8 +26,8 @@ DOJO_DEBUG = getattr(settings, "DOJANGO_DOJO_DEBUG", DEBUG) # using the default 
 # - use_gfx: there is a special case, when using dojox.gfx from aol (see http://dev.aol.com/dojo)
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
-_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1')
-_google_versions = ('1.1.1')
+_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0',)
+_google_versions = ('1.1.1', '1.2.0',)
 DOJO_PROFILES = {
     'google': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
