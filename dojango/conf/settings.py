@@ -4,7 +4,7 @@ from django.conf import settings
 DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 
-DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.1.1")
+DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.2.0")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "aol")
 
 BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/media')
@@ -15,6 +15,7 @@ BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "
 DOJO_THEME_URL = getattr(settings, "DOJANGO_DOJO_THEME_URL", False)
 DOJO_THEME = getattr(settings, "DOJANGO_DOJO_THEME", "tundra")
 DOJO_DEBUG = getattr(settings, "DOJANGO_DOJO_DEBUG", DEBUG) # using the default django DEBUG setting
+DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_DOJO", True) # if you are using dojo version < 1.2.0 you have set it to False
 
 # set the urls for actual possible paths for dojo
 # one dojo profile must at least contain a path that defines the base url of a dojo installation
@@ -35,7 +36,7 @@ DOJO_PROFILES = {
     'aol_uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_aol_versions},
     'aol_gfx': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'versions':_aol_versions},
     'aol_gfx-uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'uncompressed':True, 'versions':_aol_versions},
-    'local': {'base_url': '%(BASE_MEDIA_URL)s/dojo', 'is_local':True}, # we don't have a restriction on versions
+    'local': {'base_url': '%(BASE_MEDIA_URL)s/dojo', 'is_local':True}, # we don't have a restriction on version names, name them as you like
     'local_release': {'base_url': '%(BUILD_MEDIA_URL)s', 'is_local':True, 'is_local_build':True}, # this will be available after the first dojo build!
     'local_release_uncompressed': {'base_url': '%(BUILD_MEDIA_URL)s', 'uncompressed':True, 'is_local':True, 'is_local_build':True} # same here
 }
