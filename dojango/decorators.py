@@ -4,6 +4,11 @@ from django.utils import simplejson as json
 from util import json_response as json_resp
 from util import to_dojo_data
 
+try:
+    from functools import wraps
+except ImportError:
+    from django.utils.functional import wraps  # Python 2.3, 2.4 fallback.
+
 def expect_post_request(func):
     """Allow only POST requests to come in, throw an exception otherwise.
     
@@ -52,25 +57,90 @@ def __getdict(self, key):
 
 def json_response(func):
     """
+    A simple json response decorator. Use it on views, where a python data object should be converted
+    to a json response:
+
+        @json_response
+        def my_view(request):
+           my_data = {'foo': 'bar'}
+           return my_data
     """
-    def _ret(*args, **kwargs):
-        ret = func(*args, **kwargs)
-        if ret==False:
-            ret = {'success':False}
-        elif ret==None: # Sometimes there is no return.
-            ret = {}
-        # Add the 'ret'=True, since it was obviously no set yet and we got valid data, no exception.
+    def inner(request, *args, **kwargs):
+        ret = func(request, *args, **kwargs)
+        return __prepare_json_ret(request, ret)
+    return wraps(func)(inner)
+
+def jsonp_response_custom(callback_param_name):
+    """
+    A jsonp (JSON with Padding) response decorator, where you can define your own callbackParamName.
+    It acts like the json_response decorator but with the difference, that it
+    wraps the returned json string into a client-specified function name (that is the Padding).
+    
+    You can add this decorator to a function like that:
+    
+        @json_response_custom("my_callback_param")
+        def my_view(request):
+            my_data = {'foo': 'bar'}
+            return my_data
+
+    Your now can access this view from a foreign URL using JSONP.
+    An example with Dojo looks like that:
+    
+        dojo.io.script.get({ url:"http://example.com/my_url/",
+                             callbackParamName:"my_callback_param",
+                             load: function(response){
+                                 console.log(response);
+                             }
+                           });
+                           
+    Note: the callback_param_name in the decorator and in your JavaScript JSONP call must be the same.
+    """
+    def decorator(func):
+        def inner(request, *args, **kwargs):
+            ret = func(request, *args, **kwargs)
+            return __prepare_json_ret(request, ret, callback_param_name=callback_param_name)
+        return wraps(func)(inner)
+    return decorator
+
+jsonp_response = jsonp_response_custom("jsonp_callback")
+jsonp_response.__doc__ = "A predefined jsonp response decorator using 'jsoncallback' as a fixed callback_param_name."
+
+def json_iframe_response(func):
+    """
+    A simple json response decorator but wrapping the json response into a html page.
+    It helps when doing a json request using an iframe (e.g. file up-/download):
+
+        @json_iframe
+        def my_view(request):
+           my_data = {'foo': 'bar'}
+           return my_data
+    """
+    def inner(request, *args, **kwargs):
+        ret = func(request, *args, **kwargs)
+        return __prepare_json_ret(request, ret, use_iframe=True)
+    return wraps(func)(inner)
+
+def __prepare_json_ret(request, ret, callback_param_name=None, use_iframe=False):
+    if ret==False:
+        ret = {'success':False}
+    elif ret==None: # Sometimes there is no return.
+        ret = {}
+    # Add the 'ret'=True, since it was obviously no set yet and we got valid data, no exception.
+    func_name = None
+    if callback_param_name:
+        func_name = request.GET.get(callback_param_name, "callbackParamName")
+    try:
         if not ret.has_key('success'):
             ret['success'] = True
-        json_ret = ""
-        try:
-            # Sometimes the serialization fails, i.e. when there are too deeply nested objects or even classes inside
-            json_ret = json_resp(ret)
-        except Exception, e:
-            print '\n\n===============Exception=============\n\n'+str(e)+'\n\n' 
-            print ret
-            print '\n\n'
-            return HttpResponseServerError(content=str(e))
-        return json_ret
-    return _ret
-
+    except AttributeError, e:
+        raise Exception("The returned data of your function must be a dictionary!")
+    json_ret = ""
+    try:
+        # Sometimes the serialization fails, i.e. when there are too deeply nested objects or even classes inside
+        json_ret = json_resp(ret, func_name, use_iframe)
+    except Exception, e:
+        print '\n\n===============Exception=============\n\n'+str(e)+'\n\n' 
+        print ret
+        print '\n\n'
+        return HttpResponseServerError(content=str(e))
+    return json_ret

@@ -7,6 +7,7 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.utils import simplejson as json
 from django.utils.encoding import force_unicode
 from django.utils.functional import Promise
@@ -85,10 +86,34 @@ def json_encode(data):
     ret = _any(data)
     
     return json.dumps(ret, cls=DateTimeAwareJSONEncoder)
+
+def json_decode(json_string):
+    """
+    This function is just for convenience/completeness (because we have json_encode).
+    Sometimes you want to convert a json-string to a python object.
+    It throws a ValueError, if the JSON String is invalid.
+    """
+    return json.loads(json_string)
     
-def json_response(data):
+def json_response(data, func_name=None, use_iframe=False):
+    """
+    This functions creates a http response object. It mainly set the right
+    headers for you.
+    If you pass a func_name to it, it'll surround the json data with a function name.
+    """
     data = json_encode(data)
+    # as of dojo version 1.2.0, prepending {}&&\n is the most secure way!!!
+    # for dojo version < 1.2.0 you have to set DOJANGO_DOJO_SECURE_JSON = False
+    # in your settings file!
+    if settings.DOJO_SECURE_JSON:
+        data = "{}&&\n" + data
+    # don't wrap it into a function, if we use an iframe
+    if func_name and not use_iframe:
+        data = "%s(%s)" % (func_name, data)
     mimetype = "text/json"
+    if use_iframe:
+        mimetype = "text/html"
+        data = render_to_string("dojango/json_iframe.html", {'json_data': data})
     ret = HttpResponse(data, mimetype=mimetype+"; charset=%s" % settings.DEFAULT_CHARSET)
     # The following are for IE especially
     ret['Pragma'] = "no-cache"
