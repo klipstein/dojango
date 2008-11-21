@@ -15,7 +15,7 @@ BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "
 DOJO_THEME_URL = getattr(settings, "DOJANGO_DOJO_THEME_URL", False)
 DOJO_THEME = getattr(settings, "DOJANGO_DOJO_THEME", "tundra")
 DOJO_DEBUG = getattr(settings, "DOJANGO_DOJO_DEBUG", DEBUG) # using the default django DEBUG setting
-DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_DOJO", True) # if you are using dojo version < 1.2.0 you have set it to False
+DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you are using dojo version < 1.2.0 you have set it to False
 
 # set the urls for actual possible paths for dojo
 # one dojo profile must at least contain a path that defines the base url of a dojo installation
