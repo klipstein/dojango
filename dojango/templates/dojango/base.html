@@ -11,21 +11,34 @@
 		{% get_current_language as LANGUAGE_CODE %}
 		{% get_current_language_bidi as LANGUAGE_BIDI %}
 	{% endif %}
-{% endspaceless %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% block _dojango_doctype %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% endblock %}
+{% endspaceless %}{% block _dojango_html_start_tag %}
 <html xmlns="http://www.w3.org/1999/xhtml"{% block _dojango_html_lang %}{% endblock %}>
+{% endblock %}
 {% spaceless %}
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />{# This must be before any non-english text, i.e. title. http://www.dojotoolkit.org/book/dojo-book-0-9/part-3-programmatic-dijit-and-dojo/i18n/globalization-guidelines/encoding-guideli#textfiles #}
 		{% block _dojango_meta_lang %}{% endblock %}
 		<title>{% block dojango_page_title %}{% endblock %}</title>
+		{% block _dojango_dojo_styles %}
+			<style type="text/css">
+				@import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+				@import "{{ DOJANGO.THEME_CSS_URL }}";
+			</style>
+		{% endblock %}
 		<script type="text/javascript">
-		
 			{# baseUrl setting is needed, if you want to combine a local with a remote build! #}
 			{% block _dojango_dj_config %}
 				var djConfig = {
 					'isDebug':{{ DOJANGO.DEBUG|json }},
 					'parseOnLoad':true,
 					'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+					{% if not DOJANGO.IS_LOCAL %}
+						,'dojoBlankHtmlUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
+						,'dojoIframeHistoryUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
+					{% endif %}
 				};
 			{% endblock %}
 			
@@ -36,7 +49,6 @@
 				'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
 			};
 			{% endblock %}
-			
 		</script>
 	
 		{% block _dojango_post_dj_config %}{# don't use this block, it is used by base_i18n.html #}{% endblock %}
@@ -49,13 +61,6 @@
 		{% if not DOJANGO.IS_LOCAL_BUILD %}
 			<script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
 		{% endif %}
-		
-		{% block _dojango_dojo_styles %}
-			<style type="text/css">
-				@import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
-				@import "{{ DOJANGO.THEME_CSS_URL }}";
-			</style>
-		{% endblock %}
 	
 		{% block dojango_header_extra %}{% endblock %}
 	</head>

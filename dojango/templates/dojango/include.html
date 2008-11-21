@@ -5,14 +5,20 @@
 	{# if the context processor did not pass the DOJANGO context, we set it here #}
 	{% set_dojango_context %}
 {% endif %}
-
-
+<style type="text/css">
+    @import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+    @Import "{{ DOJANGO.THEME_CSS_URL }}";
+</style>
 <script type="text/javascript">
     {# baseUrl setting is needed, if you want to combine a local with a remote build! #}
 	var djConfig = {
 		'isDebug':{{ DOJANGO.DEBUG|json }},
 		'parseOnLoad':true,
 		'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+		{% if not DOJANGO.IS_LOCAL %}
+			,'dojoBlankHtmlUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
+			,'dojoIframeHistoryUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
+		{% endif %}
 	};
 	{# needed by dojango.registerModulePath (see dojango.js) #}
 	var dojangoConfig = {
@@ -28,7 +34,3 @@
 {% if not DOJANGO.IS_LOCAL_BUILD %}
     <script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
 {% endif %}
-<style type="text/css">
-    @import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
-    @Import "{{ DOJANGO.THEME_CSS_URL }}";
-</style>
