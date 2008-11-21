@@ -18,7 +18,7 @@ class AJAXSimpleExceptionResponse:
     """
     def process_exception(self, request, exception):
         #if settings.DEBUG:
-        if request.META.get('HTTP_X_REQUESTED_WITH', None) == 'XMLHttpRequest':
+        if request.is_ajax(): # new in django version 1.0
             import sys, traceback
             (exc_type, exc_info, tb) = sys.exc_info()
             response = "%s\n" % exc_type.__name__
