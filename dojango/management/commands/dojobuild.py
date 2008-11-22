@@ -85,8 +85,11 @@ class Command(BaseCommand):
         # we add the version to our destination base path
         self.dojo_release_dir = '%(base_path)s' % {
                           'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},} # we don't want to have a dependancy to the project's settings file!
+        # the build command handling is so different between the versions!
+        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+            self.dojo_release_dir = self.dojo_release_dir + os.path.sep
         # setting up the build command
-        build_addon = ""
+        build_addons = ""
         if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
             # since version 1.2.0 there is an additional commandline option that does the mini build (solved within js!)
             build_addons = "mini=true"
@@ -143,7 +146,7 @@ see: http://dojotoolkit.org/license for details
     
     def _dojo_mini_after_build(self):
         try: 
-            '''Copied from the build_mini.sh shell script'''
+            '''Copied from the build_mini.sh shell script (thank you Pete Higgins :-))'''
             if not os.path.exists(self.dojo_release_dir):
                 raise CommandError('The dojo build failed! Check messages above!')
             else:
