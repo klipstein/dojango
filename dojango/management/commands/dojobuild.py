@@ -28,11 +28,14 @@ class Command(BaseCommand):
             help='Set the version of the build release (e.g. dojango_1.1.1).'),
         make_option('--minify', dest='minify', action="store_true", default=False,
             help='Does a dojo mini build (mainly removing unneeded files (tests/templates/...)'),
+        make_option('--minify_extreme', dest='minify_extreme', action="store_true", default=False,
+            help='Does a dojo extreme-mini build (keeps only what is defined in build profile and all media files)'),
     )
     help = "Builds a dojo release."
     args = '[dojo build profile name]'
     dojo_base_dir = None
     dojo_release_dir = None
+    keep_files = None
     
     def handle(self, *args, **options):
         if len(args)==0:
@@ -43,6 +46,10 @@ class Command(BaseCommand):
         profile = self._get_profile(profile_name)
         used_src_version = profile['used_src_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         profile_file = os.path.basename(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT})
+        # used by minify_extreme!
+        self.keep_files = profile.get("minify_extreme_keep_files", None)
+        if not self.keep_files:
+            self.keep_files = ()
         self.dojo_base_dir = "%(dojo_root)s/%(version)s" % \
                              {'dojo_root':settings.BASE_DOJO_ROOT, 
                              'version':used_src_version}
@@ -61,32 +68,49 @@ class Command(BaseCommand):
         # copy the profile to the 
         shutil.copyfile(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT}, dest_profile_file)
         buildscript_dir = os.path.abspath('%s/buildscripts' % util_base_dir)
-        executable = '%(java_exec)s -jar ../shrinksafe/custom_rhino.jar build.js' % \
-                     {'java_exec':settings.DOJO_BUILD_JAVA_EXEC}
+        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+            executable = '%(java_exec)s -jar ../shrinksafe/custom_rhino.jar build.js' % \
+                         {'java_exec':settings.DOJO_BUILD_JAVA_EXEC}
+        else:
+            # use the new build command line call!
+            if(os.path.sep == "\\"):
+                executable = 'build.bat'
+            else:
+                executable = './build.sh'
         # use the passed version for building
         version = options.get('build_version', None)
         if not version:
             # if no option --build_version was passed, we use the default build version
             version = profile['build_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         # we add the version to our destination base path
-        self.dojo_release_dir = '%(base_path)s/%(version)s' % {
-                          'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT}, # we don't want to have a dependancy to the project's settings file!
-                          'version':version}
+        self.dojo_release_dir = '%(base_path)s' % {
+                          'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},} # we don't want to have a dependancy to the project's settings file!
         # setting up the build command
-        exe_command = 'cd %(buildscript_dir)s && %(executable)s version=%(version)s releaseName="" releaseDir=%(release_dir)s %(options)s' % \
+        build_addon = ""
+        if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
+            # since version 1.2.0 there is an additional commandline option that does the mini build (solved within js!)
+            build_addons = "mini=true"
+        exe_command = 'cd %(buildscript_dir)s && %(executable)s version=%(version)s releaseName="%(version)s" releaseDir=%(release_dir)s %(options)s %(build_addons)s' % \
                       {'buildscript_dir':buildscript_dir,
                        'executable':executable,
                        'version':version,
                        'release_dir':self.dojo_release_dir,
-                       'options':profile['options']}
+                       'options':profile['options'],
+                       'build_addons':build_addons}
+        # for the minifying process the release_dir is the folder with version included
+        self.dojo_release_dir = self.dojo_release_dir + "/" + version
         # print exe_command
         minify = options['minify']
-        if minify:
+        minify_extreme = options['minify_extreme']
+        if settings.DOJO_BUILD_USED_VERSION < '1.2.0' and (minify or minify_extreme):
             self._dojo_mini_before_build()
         # do the build
         os.system(exe_command)
-        if minify:
-            self._dojo_mini_after_build()
+        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+            if minify or minify_extreme:
+                self._dojo_mini_after_build()
+        if minify_extreme:
+            self._dojo_mini_extreme()
         os.remove(dest_profile_file) # remove the copied profile file
         
     def _get_profile(self, name):
@@ -116,7 +140,7 @@ see: http://dojotoolkit.org/license for details
         # create an empty build-notice-file
         f = open("%s/util/buildscripts/build_notice.txt" % self.dojo_base_dir, 'w')
         f.close()
-        
+    
     def _dojo_mini_after_build(self):
         try: 
             '''Copied from the build_mini.sh shell script'''
@@ -172,3 +196,39 @@ see: http://dojotoolkit.org/license for details
                     my_re = re.compile(regexp)
                     if my_re.match(dir):
                         shutil.rmtree(os.path.join(root, dir))
+
+    EXT_TO_KEEP = (".png", ".gif", ".jpg", ".svg", ".swf", ".fla", ".mov", ".smd",)
+    FILES_TO_KEEP = ("xip_client.html", "xip_server.html", "dojo.js",
+                     "dojo.xd.js", "iframe_history.html", "blank.html",)
+    def _dojo_mini_extreme(self):
+        """
+        This method removes all js files and just leaves all layer dojo files and static files (like "png", "gif", "svg", "swf", ...)
+        """
+        try:
+            '''Copied from the build_mini.sh shell script'''
+            if not os.path.exists(self.dojo_release_dir):
+                raise CommandError('The dojo build failed! Check messages above!')
+            else:
+                for root, dirs, files in os.walk(self.dojo_release_dir):
+                    for file in files:
+                        # remove all html-files
+                        my_ext = os.path.splitext(file)[1]
+                        my_keep_files = self.FILES_TO_KEEP + self.keep_files
+                        if not my_ext in self.EXT_TO_KEEP and not file in my_keep_files and not os.path.basename(root) == "nls":
+                            os.remove(os.path.join(root, file))
+                    for dir in dirs:
+                        # special handling for nls folders
+                        fullpath = os.path.join(root, dir)
+                        # we delete all nls folders of dijit and dojox
+                        if dir == "nls" and (fullpath.find("/dijit/") or fullpath.find("/dojox/")):
+                            shutil.rmtree(os.path.join(root, dir))
+                # now remove all empty directories
+                for root, dirs, files in os.walk(self.dojo_release_dir):
+                    for dir in dirs:
+                        try:
+                            # just empty directories will be removed!
+                            os.removedirs(os.path.join(root, dir))
+                        except OSError:
+                            pass
+        except Exception, e:
+            print e

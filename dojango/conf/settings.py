@@ -28,14 +28,15 @@ DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you 
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
 _aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0',)
+_aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
 _google_versions = ('1.1.1', '1.2.0',)
 DOJO_PROFILES = {
     'google': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
     'aol': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'versions':_aol_versions},
     'aol_uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_aol_versions},
-    'aol_gfx': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'versions':_aol_versions},
-    'aol_gfx-uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'uncompressed':True, 'versions':_aol_versions},
+    'aol_gfx': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'versions':_aol_gfx_versions},
+    'aol_gfx-uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'uncompressed':True, 'versions':_aol_gfx_versions},
     'local': {'base_url': '%(BASE_MEDIA_URL)s/dojo', 'is_local':True}, # we don't have a restriction on version names, name them as you like
     'local_release': {'base_url': '%(BUILD_MEDIA_URL)s', 'is_local':True, 'is_local_build':True}, # this will be available after the first dojo build!
     'local_release_uncompressed': {'base_url': '%(BUILD_MEDIA_URL)s', 'uncompressed':True, 'is_local':True, 'is_local_build':True} # same here
@@ -49,7 +50,7 @@ DOJO_PROFILES.update(getattr(settings, "DOJANGO_DOJO_PROFILES", {}))
 # =============================================================================================
 # general doc: http://dojotoolkit.org/book/dojo-book-0-9/part-4-meta-dojo/package-system-and-custom-builds
 # see http://www.sitepen.com/blog/2008/04/02/dojo-mini-optimization-tricks-with-the-dojo-toolkit/ for details
-DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", "1.1.1")
+DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.2.0')
 # this is the default build profile, that is used, when calling "./manage.py dojobuild"
 # "./manage.py dojobuild dojango" would would have the same effect
 DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
@@ -62,10 +63,11 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 #   base_root: in which directory will the dojo version be builded to? 
 #   used_src_version: which version should be used for the dojo build (e.g. 1.1.1)
 #   build_version: what is the version name of the builded release (e.g. dojango1.1.1) - this option can be overwritten by the commandline parameter --build_version=...
+#   minify_extreme_keep_files: a tupel of files (filename without path!) that should be kept when doing a minify extreme (useful when you have several layers and don't want to remove those)
 DOJO_BUILD_PROFILES = {
     'dojango': {
         'profile_file': '%(BASE_MEDIA_ROOT)s/dojango.profile.js',
-        'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines'
+        'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
     },
     'dojango_optimized': {
         'profile_file': '%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js',
@@ -89,3 +91,6 @@ DOJO_BUILD_PROFILES_DEFAULT = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES_DEF
 # you can add/overwrite your own build profiles
 DOJO_BUILD_PROFILES.update(getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES", {}))
 DOJO_BUILD_JAVA_EXEC = getattr(settings, 'DOJANGO_DOJO_BUILD_JAVA_EXEC', 'java')
+# a version string that must have the following form: '1.0.0', '1.2.1', ....
+# this setting is used witin the dojobuild, because the build process changed since version 1.2.0
+DOJO_BUILD_USED_VERSION = getattr(settings, 'DOJANGO_DOJO_BUILD_USED_VERSION', '1.2.0')
