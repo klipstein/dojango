@@ -210,7 +210,7 @@ see: http://dojotoolkit.org/license for details
     EXT_TO_KEEP = (".png", ".gif", ".jpg", ".svg", ".swf", ".fla", ".mov", ".smd",)
     FILES_TO_KEEP = ("xip_client.html", "xip_server.html", "dojo.js",
                      "dojo.xd.js", "iframe_history.html", "blank.html",)
-    FOLDERS_TO_KEEP = ("nls", "contrib", "ext-dojo", "filter", "render", "tag", "utils", ) # several folders are needed by dojox.dtl!
+    FOLDERS_TO_KEEP = ("_firebug", "contrib", "ext-dojo", "filter", "render", "tag", "utils", ) # several folders are needed by dojox.dtl!
     def _dojo_mini_extreme(self):
         """
         This method removes all js files and just leaves all layer dojo files and static files (like "png", "gif", "svg", "swf", ...)
@@ -226,13 +226,13 @@ see: http://dojotoolkit.org/license for details
                         my_ext = os.path.splitext(file)[1]
                         my_keep_files = self.FILES_TO_KEEP + self.keep_files
                         if not my_ext in self.EXT_TO_KEEP and not file in my_keep_files and\
-                           not os.path.basename(root) in self.FOLDERS_TO_KEEP:
+                           not os.path.basename(root) in self.FOLDERS_TO_KEEP and os.path.abspath(os.path.join(root, file)).find("/nls/") == -1:
                             os.remove(os.path.join(root, file))
                     for dir in dirs:
                         # special handling for nls folders
                         fullpath = os.path.join(root, dir)
                         # we delete all nls folders of dijit and dojox
-                        if dir == "nls" and (fullpath.find("/dijit/") or fullpath.find("/dojox/")):
+                        if dir == "nls" and (fullpath.find("/dijit/") > -1 or fullpath.find("/dojox/") > -1):
                             shutil.rmtree(os.path.join(root, dir))
                 # now remove all empty directories
                 for root, dirs, files in os.walk(self.dojo_release_dir):
