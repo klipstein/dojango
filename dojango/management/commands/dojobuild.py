@@ -209,7 +209,8 @@ see: http://dojotoolkit.org/license for details
 
     EXT_TO_KEEP = (".png", ".gif", ".jpg", ".svg", ".swf", ".fla", ".mov", ".smd",)
     FILES_TO_KEEP = ("xip_client.html", "xip_server.html", "dojo.js",
-                     "dojo.xd.js", "iframe_history.html", "blank.html",)
+                     "dojo.xd.js", "iframe_history.html", "blank.html",
+                     "dojo.css", "tundra.css", "nihilo.css", "soria.css",)
     FOLDERS_TO_KEEP = ("_firebug", "contrib", "ext-dojo", "filter", "render", "tag", "utils", ) # several folders are needed by dojox.dtl!
     def _dojo_mini_extreme(self):
         """
