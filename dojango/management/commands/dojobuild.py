@@ -203,6 +203,7 @@ see: http://dojotoolkit.org/license for details
     EXT_TO_KEEP = (".png", ".gif", ".jpg", ".svg", ".swf", ".fla", ".mov", ".smd",)
     FILES_TO_KEEP = ("xip_client.html", "xip_server.html", "dojo.js",
                      "dojo.xd.js", "iframe_history.html", "blank.html",)
+    FOLDERS_TO_KEEP = ("nls", "contrib", "ext-dojo", "filter", "render", "tag", "utils", ) # several folders are needed by dojox.dtl!
     def _dojo_mini_extreme(self):
         """
         This method removes all js files and just leaves all layer dojo files and static files (like "png", "gif", "svg", "swf", ...)
@@ -217,7 +218,8 @@ see: http://dojotoolkit.org/license for details
                         # remove all html-files
                         my_ext = os.path.splitext(file)[1]
                         my_keep_files = self.FILES_TO_KEEP + self.keep_files
-                        if not my_ext in self.EXT_TO_KEEP and not file in my_keep_files and not os.path.basename(root) == "nls":
+                        if not my_ext in self.EXT_TO_KEEP and not file in my_keep_files and\
+                           not os.path.basename(root) in self.FOLDERS_TO_KEEP:
                             os.remove(os.path.join(root, file))
                     for dir in dirs:
                         # special handling for nls folders
