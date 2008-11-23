@@ -89,12 +89,13 @@ class Command(BaseCommand):
             # if no option --build_version was passed, we use the default build version
             version = profile['build_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         # we add the version to our destination base path
-        self.dojo_release_dir = '%(base_path)s' % {
-                          'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},} # we don't want to have a dependancy to the project's settings file!
+        self.dojo_release_dir = '%(base_path)s/%(version)s' % {
+                          'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},
+                          'version':version} # we don't want to have a dependancy to the project's settings file!
         # the build command handling is so different between the versions!
         # sometimes we need to add /, sometimes not :-(
         # if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
-        self.dojo_release_dir = self.dojo_release_dir + os.path.sep
+        release_dir = os.path.abspath(os.path.join(self.dojo_release_dir, "../")) + os.path.sep
         # setting up the build command
         build_addons = ""
         if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
@@ -104,11 +105,9 @@ class Command(BaseCommand):
                       {'buildscript_dir':buildscript_dir,
                        'executable':executable,
                        'version':version,
-                       'release_dir':self.dojo_release_dir,
+                       'release_dir':release_dir,
                        'options':profile['options'],
                        'build_addons':build_addons}
-        # for the minifying process the release_dir is the folder with version included
-        self.dojo_release_dir = self.dojo_release_dir + "/" + version
         # print exe_command
         minify = options['minify']
         minify_extreme = options['minify_extreme']
