@@ -3,9 +3,15 @@ from optparse import make_option
 import os
 import re
 import shutil
-
-from django.core.management.base import BaseCommand, AppCommand, CommandError
 from dojango.conf import settings
+
+try:
+    from django.core.management.base import BaseCommand, CommandError
+except ImportError:
+    # Fake BaseCommand out so imports on django 0.96 don't fail.
+    BaseCommand = object
+    class CommandError(Exception):
+        pass
 
 class Command(BaseCommand):
     '''This command is used to create your own dojo build. To start a build, you just
@@ -86,8 +92,9 @@ class Command(BaseCommand):
         self.dojo_release_dir = '%(base_path)s' % {
                           'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},} # we don't want to have a dependancy to the project's settings file!
         # the build command handling is so different between the versions!
-        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
-            self.dojo_release_dir = self.dojo_release_dir + os.path.sep
+        # sometimes we need to add /, sometimes not :-(
+        # if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+        self.dojo_release_dir = self.dojo_release_dir + os.path.sep
         # setting up the build command
         build_addons = ""
         if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
