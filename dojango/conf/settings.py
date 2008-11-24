@@ -63,7 +63,8 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 #   base_root: in which directory will the dojo version be builded to? 
 #   used_src_version: which version should be used for the dojo build (e.g. 1.1.1)
 #   build_version: what is the version name of the builded release (e.g. dojango1.1.1) - this option can be overwritten by the commandline parameter --build_version=...
-#   minify_extreme_keep_files: a tupel of files (filename without path!) that should be kept when doing a minify extreme (useful when you have several layers and don't want to remove those)
+#   minify_extreme_skip_files: a tupel of files/folders (each expressed as regular expression) that should be kept when doing a minify extreme (useful when you have several layers and don't want some files)
+#                              this tupel will be appended to the default folders/files that are skipped: see SKIP_FILES in management/commands/dojobuild.py 
 DOJO_BUILD_PROFILES = {
     'dojango': {
         'profile_file': '%(BASE_MEDIA_ROOT)s/dojango.profile.js',

@@ -41,7 +41,7 @@ class Command(BaseCommand):
     args = '[dojo build profile name]'
     dojo_base_dir = None
     dojo_release_dir = None
-    keep_files = None
+    skip_files = None
     
     def handle(self, *args, **options):
         if len(args)==0:
@@ -53,9 +53,7 @@ class Command(BaseCommand):
         used_src_version = profile['used_src_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
         profile_file = os.path.basename(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT})
         # used by minify_extreme!
-        self.keep_files = profile.get("minify_extreme_keep_files", None)
-        if not self.keep_files:
-            self.keep_files = ()
+        self.skip_files = profile.get("minify_extreme_skip_files", ())
         self.dojo_base_dir = "%(dojo_root)s/%(version)s" % \
                              {'dojo_root':settings.BASE_DOJO_ROOT, 
                              'version':used_src_version}
@@ -205,16 +203,41 @@ see: http://dojotoolkit.org/license for details
                     my_re = re.compile(regexp)
                     if my_re.match(dir):
                         shutil.rmtree(os.path.join(root, dir))
-
-    EXT_TO_KEEP = (".png", ".gif", ".jpg", ".svg", ".swf", ".fla", ".mov", ".smd",)
-    FILES_TO_KEEP = ("xip_client.html", "xip_server.html", "dojo.js",
-                     "dojo.xd.js", "iframe_history.html", "blank.html",
-                     "dojo.css", "tundra.css", "nihilo.css", "soria.css",)
-    FOLDERS_TO_KEEP = ("_firebug", "contrib", "ext-dojo", "filter", "render", "tag", "utils", ) # several folders are needed by dojox.dtl!
+    
+    SKIP_FILES = (
+        '(.*\.png)',
+        '(.*\.gif)',
+        '(.*\.jpg)',
+        '(.*\.svg)',
+        '(.*\.swf)',
+        '(.*\.fla)',
+        '(.*\.mov)',
+        '(.*\.smd)',
+        '(dojo/_firebug/firebug\..*)',
+        '(dojo/dojo\.(xd\.)?js)',
+        '(dojo/nls/.*)',
+        '(dojo/resources/dojo\.css)',
+        '(dojo/resources/blank\.html)',
+        '(dojo/resources/ifram_history\.html)',
+        '(dijit/themes/tundra/tundra\.css)',
+        '(dijit/themes/soria/soria\.css)',
+        '(dijit/themes/nihilo/nihilo\.css)',
+        '(dojox/dtl/contrib/.*)',
+        '(dojox/dtl/ext-dojo/.*)',
+        '(dojox/dtl/filter/.*)',
+        '(dojox/dtl/render/.*)',
+        '(dojox/dtl/tag/.*)',
+        '(dojox/dtl/utils/.*)',
+        '(dojox/io/proxy/xip_.*\.html)',
+    )
     def _dojo_mini_extreme(self):
         """
         This method removes all js files and just leaves all layer dojo files and static files (like "png", "gif", "svg", "swf", ...)
         """
+        # prepare the regexp of files not to be removed!
+        # mixin the profile specific skip files
+        skip_files = self.SKIP_FILES + self.skip_files
+        my_re = re.compile('^(.*/)?(%s)$' % "|".join(skip_files))
         try:
             '''Copied from the build_mini.sh shell script'''
             if not os.path.exists(self.dojo_release_dir):
@@ -223,17 +246,9 @@ see: http://dojotoolkit.org/license for details
                 for root, dirs, files in os.walk(self.dojo_release_dir):
                     for file in files:
                         # remove all html-files
-                        my_ext = os.path.splitext(file)[1]
-                        my_keep_files = self.FILES_TO_KEEP + self.keep_files
-                        if not my_ext in self.EXT_TO_KEEP and not file in my_keep_files and\
-                           not os.path.basename(root) in self.FOLDERS_TO_KEEP and os.path.abspath(os.path.join(root, file)).find("/nls/") == -1:
-                            os.remove(os.path.join(root, file))
-                    for dir in dirs:
-                        # special handling for nls folders
-                        fullpath = os.path.join(root, dir)
-                        # we delete all nls folders of dijit and dojox
-                        if dir == "nls" and (fullpath.find("/dijit/") > -1 or fullpath.find("/dojox/") > -1):
-                            shutil.rmtree(os.path.join(root, dir))
+                        my_file = os.path.abspath(os.path.join(root, file))
+                        if not my_re.match(my_file):
+                            os.remove(my_file)
                 # now remove all empty directories
                 for root, dirs, files in os.walk(self.dojo_release_dir):
                     for dir in dirs:
