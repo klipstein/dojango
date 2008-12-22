@@ -1,0 +1,20 @@
+This directory contains some helpers for running dojango on appengine.
+
+memcache_zipserve.py:
+
+  Part of http://code.google.com/p/google-app-engine-samples/: 
+  Using zipserve to serve the media-files. After the first use they'll be 
+  cached in memcache. Modified to support last-modified-headers (so we have 
+  a real CDN!)
+
+dojo_serve.py:
+  
+  Helper for serving the whole dojo release folder, that holds the dojo
+  modules as zipfiles.
+  It can be used within app.yaml (AppEngine configuration file) like this:
+
+      - url: /dojango/media/release/.*
+        script: dojango/appengine/dojo_serve.py
+
+  Afterwards all zip-files within /dojango/media/release/DOJANGO_DOJO_VERSION/
+  will be served and cached.

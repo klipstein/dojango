@@ -36,6 +36,8 @@ class Command(BaseCommand):
             help='Does a dojo mini build (mainly removing unneeded files (tests/templates/...)'),
         make_option('--minify_extreme', dest='minify_extreme', action="store_true", default=False,
             help='Does a dojo extreme-mini build (keeps only what is defined in build profile and all media files)'),
+        make_option('--prepare_zipserve', dest='prepare_zipserve', action="store_true", default=False,
+            help='Zips everything you have built, so it can be deployed to Google AppEngine'),
     )
     help = "Builds a dojo release."
     args = '[dojo build profile name]'
@@ -109,6 +111,7 @@ class Command(BaseCommand):
         # print exe_command
         minify = options['minify']
         minify_extreme = options['minify_extreme']
+        prepare_zipserve = options['prepare_zipserve']
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0' and (minify or minify_extreme):
             self._dojo_mini_before_build()
         # do the build
@@ -118,6 +121,8 @@ class Command(BaseCommand):
                 self._dojo_mini_after_build()
         if minify_extreme:
             self._dojo_mini_extreme()
+        if prepare_zipserve:
+            self._dojo_prepare_zipserve()
         os.remove(dest_profile_file) # remove the copied profile file
         
     def _get_profile(self, name):
@@ -259,3 +264,52 @@ see: http://dojotoolkit.org/license for details
                             pass
         except Exception, e:
             print e
+
+    DOJO_ZIP_SPECIAL = {'dojox': ['form', 'widget', 'grid']} # these modules will be zipped separately
+    def _dojo_prepare_zipserve(self):
+        """
+        Creates zip packages for each dojo module within the current release folder.
+        It splits the module dojox into several modules, so it fits the 1000 files limit of
+        Google AppEngine.
+        """
+        for folder in os.listdir(self.dojo_release_dir):
+            module_dir = '%s/%s' % (self.dojo_release_dir, folder)
+            if os.path.isdir(module_dir):
+                if folder in self.DOJO_ZIP_SPECIAL.keys():
+                    for special_module in self.DOJO_ZIP_SPECIAL[folder]:
+                        special_module_dir = os.path.join(module_dir, special_module)
+                        create_zip(special_module_dir, 
+                                   '%(base_module)s/%(special_module)s' % {
+                                       'base_module': folder,
+                                       'special_module': special_module
+                                   },
+                                   '%(module_dir)s.%(special_module)s.zip' % {
+                                       'module_dir': module_dir,
+                                       'special_module': special_module
+                                   }
+                        )
+                        # remove the whole special module
+                        shutil.rmtree(special_module_dir)
+                # now add the 
+                create_zip(module_dir, folder, module_dir + ".zip")
+                shutil.rmtree(module_dir)
+                        
+
+def zipfolder(path, relname, archive):
+    paths = os.listdir(path)
+    for p in paths:
+        p1 = os.path.join(path, p) 
+        p2 = os.path.join(relname, p)
+        if os.path.isdir(p1): 
+            zipfolder(p1, p2, archive)
+        else:
+            archive.write(p1, p2) 
+
+def create_zip(path, relname, archname):
+    import zipfile
+    archive = zipfile.ZipFile(archname, "w", zipfile.ZIP_DEFLATED)
+    if os.path.isdir(path):
+        zipfolder(path, relname, archive)
+    else:
+        archive.write(path, relname)
+    archive.close()
