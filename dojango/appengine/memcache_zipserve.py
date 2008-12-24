@@ -22,6 +22,8 @@ class to serve HTTP GET requests. Memcache is used to increase response speed
 and lower processing cycles used in serving. Credit to Guido van Rossum and
 his implementation of zipserve which served as a reference as I wrote this.
 
+NOTE: THIS FILE WAS MODIFIED TO SUPPORT CLIENT CACHING
+
   MemcachedZipHandler: Class that serves request
   create_handler: method to create instance of MemcachedZipHandler
 """
@@ -40,7 +42,9 @@ from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
-def create_handler(zip_files, max_age=None, public=None, add_last_modified=None):
+from django.utils.hashcompat import md5_constructor
+
+def create_handler(zip_files, max_age=None, public=None, client_caching=None):
   """Factory method to create a MemcachedZipHandler instance.
 
   Args:
@@ -80,8 +84,8 @@ def create_handler(zip_files, max_age=None, public=None, add_last_modified=None)
         self.MAX_AGE = max_age
       if public is not None:
         self.PUBLIC = public
-      if add_last_modified is not None:
-        self.ADD_LAST_MODIFIED = True
+      if client_caching is not None:
+        self.CLIENT_CACHING = client_caching
       self.TrueGet(name)
 
   return HandlerWrapper
@@ -99,7 +103,8 @@ class MemcachedZipHandler(webapp.RequestHandler):
   """
   zipfile_cache = {}                # class cache of source zip files
   current_last_modified = None      # where we save the current last modified datetime
-  ADD_LAST_MODIFIED = True          # shall last_modified be appended to the response
+  current_etag = None               # the current ETag of a file served
+  CLIENT_CACHING = True             # is client caching enabled? (sending Last-Modified and ETag within response!)
   MAX_AGE = 600                     # max client-side cache lifetime
   PUBLIC = True                     # public cache setting
   CACHE_PREFIX = "cache://"         # memcache key prefix for actual URLs
@@ -143,9 +148,14 @@ class MemcachedZipHandler(webapp.RequestHandler):
     if content_type:
       self.response.headers['Content-Type'] = content_type
     self.current_last_modified = resp_data.lastmod
+    self.current_etag = resp_data.etag
     self.SetCachingHeaders()
-    # IF we have enabled adding last-modified and a if-modified-since was passed by the browser
-    if self.ADD_LAST_MODIFIED and self.request.headers.has_key('If-Modified-Since'):
+    # if the received ETag matches
+    if resp_data.etag == self.request.headers.get('If-None-Match'):
+        self.error(304)
+        return
+    # if-modified-since was passed by the browser
+    if self.request.headers.has_key('If-Modified-Since'):
         dt = self.request.headers.get('If-Modified-Since').split(';')[0]
         modsince = datetime.datetime.strptime(dt, "%a, %d %b %Y %H:%M:%S %Z")
         if modsince >= self.current_last_modified:
@@ -205,9 +215,11 @@ class MemcachedZipHandler(webapp.RequestHandler):
         try:
           resp_data = CacheFile()
           info = os.stat(archive_name)
-          lastmod = datetime.datetime.fromtimestamp(info[8])
+          #lastmod = datetime.datetime.fromtimestamp(info[8])
+          lastmod = datetime.datetime(*zip_archive.getinfo(file_path).date_time)
           resp_data.file = zip_archive.read(file_path)
           resp_data.lastmod = lastmod
+          resp_data.etag = '"%s"' % md5_constructor(resp_data.file).hexdigest()
         except (KeyError, RuntimeError), err:
           # no op
           x = False
@@ -344,8 +356,12 @@ class MemcachedZipHandler(webapp.RequestHandler):
       cache_control.append('public')
     cache_control.append('max-age=%d' % max_age)
     self.response.headers['Cache-Control'] = ', '.join(cache_control)
-    if self.ADD_LAST_MODIFIED and self.current_last_modified:
-        self.response.headers['Last-Modified'] = self.current_last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    # adding caching headers for the client
+    if self.CLIENT_CACHING:
+        if self.current_last_modified:
+            self.response.headers['Last-Modified'] = self.current_last_modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
+        if self.current_etag:
+            self.response.headers['ETag'] = self.current_etag
 
   def GetFromCache(self, filename):
     """Get file from memcache, if available.
