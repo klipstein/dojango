@@ -7,7 +7,7 @@
 {% endif %}
 
 {% block _dojango_html_lang %} xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}"{% if LANGUAGE_BIDI %} dir="rtl"{% endif %}{% endblock %}
-{% block _dojango_meta_lang %}<meta http-equiv="content-language" content="{{ LANGUAGE_CODE }}" />{% endblock %}
+{% block _dojango_meta_content_lang %}<meta http-equiv="content-language" content="{{ LANGUAGE_CODE }}" />{% endblock %}
 {% block _dojango_post_dj_config %}
 <script type="text/javascript">
     djConfig['locale'] = "{{ LANGUAGE_CODE }}";

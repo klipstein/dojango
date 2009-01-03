@@ -19,8 +19,8 @@
 {% endblock %}
 {% spaceless %}
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />{# This must be before any non-english text, i.e. title. http://www.dojotoolkit.org/book/dojo-book-0-9/part-3-programmatic-dijit-and-dojo/i18n/globalization-guidelines/encoding-guideli#textfiles #}
-		{% block _dojango_meta_lang %}{% endblock %}
+		{% block _dojango_meta_content_type %}<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />{% endblock %}{# This must be before any non-english text, i.e. title. http://www.dojotoolkit.org/book/dojo-book-0-9/part-3-programmatic-dijit-and-dojo/i18n/globalization-guidelines/encoding-guideli#textfiles #}
+		{% block _dojango_meta_content_lang %}{% endblock %}
 		<title>{% block dojango_page_title %}{% endblock %}</title>
 		{% block _dojango_dojo_styles %}
 			<style type="text/css">
