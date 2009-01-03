@@ -12,6 +12,13 @@ from django.utils import simplejson as json
 from django.utils.functional import Promise
 
 try:
+    # we need it, if we want to serialize query- and model-objects
+    # of google appengine within json_encode
+    import google
+except:
+    google = None
+
+try:
     # this is just available since django version 1.0
     # google appengine does not provide this function yet!
     from django.utils.encoding import force_unicode
@@ -87,6 +94,8 @@ def json_encode(data):
         if isinstance(data, list):
             ret = _list(data)
         # Same as for lists above.
+        elif google and isinstance(data, google.appengine.ext.db.Query):
+            ret = _list(data)
         elif isinstance(data, dict):
             ret = _dict(data)
         elif isinstance(data, Decimal):
@@ -97,6 +106,8 @@ def json_encode(data):
             ret = _list(data)
         elif isinstance(data, Model):
             ret = _model(data)
+        elif google and isinstance(data, google.appengine.ext.db.Model):
+            ret = _googleModel(data)
         # here we need to encode the string as unicode (otherwise we get utf-16 in the json-response)
         elif isinstance(data, basestring):
             ret = unicode(data)
@@ -122,7 +133,14 @@ def json_encode(data):
         for k in add_ons:
             ret[k] = _any(getattr(data, k))
         return ret
-    
+
+    def _googleModel(data):
+        ret = {}
+        ret['id'] = data.key().id()
+        for f in data.fields():
+            ret[f] = _any(getattr(data, f))
+        return ret
+
     def _list(data):
         ret = []
         for v in data:
