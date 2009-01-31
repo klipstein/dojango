@@ -4,7 +4,7 @@ from django.conf import settings
 DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 
-DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.2.0")
+DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.2.3")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "google")
 
 BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/media')
@@ -27,9 +27,9 @@ DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you 
 # - use_gfx: there is a special case, when using dojox.gfx from aol (see http://dev.aol.com/dojo)
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
-_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0',)
+_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3',)
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
-_google_versions = ('1.1.1', '1.2.0',)
+_google_versions = ('1.1.1', '1.2.0', '1.2.3',)
 DOJO_PROFILES = {
     'google': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
