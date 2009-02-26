@@ -223,7 +223,7 @@ see: http://dojotoolkit.org/license for details
         '(dojo/nls/.*)',
         '(dojo/resources/dojo\.css)',
         '(dojo/resources/blank\.html)',
-        '(dojo/resources/ifram_history\.html)',
+        '(dojo/resources/iframe_history\.html)',
         '(dijit/themes/tundra/tundra\.css)',
         '(dijit/themes/soria/soria\.css)',
         '(dijit/themes/nihilo/nihilo\.css)',
