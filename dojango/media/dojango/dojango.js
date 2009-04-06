@@ -1,18 +1,19 @@
 dojo.provide("dojango.dojango");
+dojo.require("dojo.date.stamp"); // needed for ovewriting the default isoRegExp
 
 dojango.registerModulePath = function(name, absoluteUrl, relativeUrl) {
-    /* 
-     * This is an extended dojo.registerModulePath function. It sets the right 
-     * module path depending if you use a local, a builded local or a remote 
+    /*
+     * This is an extended dojo.registerModulePath function. It sets the right
+     * module path depending if you use a local, a builded local or a remote
      * xd build of dojo.
-     * 
+     *
      * If you don't register a path for a module, dojo assumes to find it in:
-     * 
-     *   ../moduleName 
-     * 
+     *
+     *   ../moduleName
+     *
      * This is utilized for a local builded version, where your own module will
      * reside next to dojo/dijit/dojox after it was built.
-     * 
+     *
      * An example on how to use an xd build and also loading local files can be found here:
      * http://jburke.dojotoolkit.org/demos/xdlocal/LocalAndXd.html
      */
@@ -30,10 +31,13 @@ dojango.registerModulePath = function(name, absoluteUrl, relativeUrl) {
     else {
         // relative to the dojo/dojo.js-file
         dojo.registerModulePath(name, relativeUrl);
-    }    
+    }
 }
 
 dojango.registerModulePath("dojango", dojangoConfig.baseUrl + "/dojango", "../../../dojango");
 
 // all required dojango functions must be loaded after the module registration
 dojo.require("dojango._base"); // we always include the basic functionality
+
+// django calculates the timezone, so we don't have to take care in the frontend
+dojo.date.stamp._isoRegExp = /^(?:(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(\d{2}):(\d{2})(?::(\d{2})(.\d+)?)?((?:[+-](\d{2}):(\d{2}))|Z)?)?$/;

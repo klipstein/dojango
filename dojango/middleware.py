@@ -1,20 +1,21 @@
+import re
+
+from django.conf import settings
 from django.http import HttpResponseServerError
+
+from dojango.forms import collector
 
 class AJAXSimpleExceptionResponse:
     """Thanks to newmaniese of http://www.djangosnippets.org/snippets/650/ .
-    
-    Full doc (copied from link above).
-    When debugging AJAX with Firebug, if a response is 500, it is a 
-    pain to have to view the entire source of the pretty exception page. 
-    This is a simple middleware that just returns the exception without 
-    any markup. You can add this anywhere in your python path and then 
-    put it in you settings file. It will only unprettify your exceptions 
-    when there is a XMLHttpRequest header. Tested in FF2 with the YUI XHR. 
-    Comments welcome.
 
-    EDIT: I recently changed the request checking to use the is_ajax() method. 
-    This gives you access to these simple exceptions for get requests as well 
-    (even though you could just point your browser there).
+    Full doc (copied from link above).
+    When debugging AJAX with Firebug, if a response is 500, it is a
+    pain to have to view the entire source of the pretty exception page.
+    This is a simple middleware that just returns the exception without
+    any markup. You can add this anywhere in your python path and then
+    put it in you settings file. It will only unprettify your exceptions
+    when there is a XMLHttpRequest header. Tested in FF2 with the YUI XHR.
+    Comments welcome.
     """
     def process_exception(self, request, exception):
         #if settings.DEBUG:
@@ -25,7 +26,47 @@ class AJAXSimpleExceptionResponse:
             (exc_type, exc_info, tb) = sys.exc_info()
             response = "%s\n" % exc_type.__name__
             response += "%s\n\n" % exc_info
-            response += "TRACEBACK:\n"    
+            response += "TRACEBACK:\n"
             for tb in traceback.format_tb(tb):
                 response += "%s\n" % tb
             return HttpResponseServerError(response)
+
+class DojoCollectorMiddleware:
+    """This middleware enables/disables the global collector object for each 
+    request. It is needed, when the dojango.forms integration is used.
+    """
+    def process_request(self, request):
+        collector.activate()
+
+    def process_response(self, request, response):
+        collector.deactivate()
+        return response
+    
+class DojoRequireResponse:
+    """
+    USE THE MIDDLEWARE ABOVE (IT IS USING A GLOBAL COLLECTOR OBEJCT)!
+    
+    This middleware detects all dojoType="*" definitions in the returned
+    response and uses that information to generate all needed dojo.require
+    statements and places a <script> block in front of the </body> tag.
+
+    It is just processed for text/html documents!
+    """
+    def process_response(self, request, response):
+        # just process html-pages that were returned by a view
+        if response and\
+           response.get("Content-Type", "") == "text/html; charset=%s" % settings.DEFAULT_CHARSET and\
+           len(response.content) > 0: # just for html pages!
+            dojo_type_re = re.compile('\sdojoType\s*\=\s*[\'\"]([\w\d\.\-\_]*)[\'\"]\s*')
+            unique_dojo_modules = set(dojo_type_re.findall(response.content)) # we just need each module once
+            tail, sep, head = response.content.rpartition("</body>")
+            response.content = "%(tail)s%(script)s%(sep)s%(head)s" % {
+                'tail':tail,
+                'script':'<script type="text/javascript">\n%s\n</script>\n' % self._get_dojo_requires(unique_dojo_modules),
+                'sep':sep,
+                'head':head,
+            }
+        return response
+
+    def _get_dojo_requires(self, dojo_modules):
+        return "\n".join([u"dojo.require(\"%s\");" % require for require in dojo_modules])

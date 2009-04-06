@@ -73,4 +73,14 @@
 	</body>
 {% endblock %}
 
+{% block dojango_require %}
+	<script type="text/javascript">
+		{% for require in DOJANGO.COLLECTOR %}
+			{% spaceless %}
+				dojo.require("{{ require }}");
+			{% endspaceless %}
+		{% endfor %}		
+	</script>
+{% endblock %}
+
 </html>
