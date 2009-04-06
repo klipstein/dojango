@@ -7,7 +7,7 @@ from django.db.models import fields
 from dojango.forms.fields import *
 from dojango.forms.widgets import Textarea, Select, SelectMultiple
 
-__all__ = [ 'ModelForm' ]
+__all__ = ['ModelForm', 'ModelChoiceField', 'ModelMultipleChoiceField',]
 
 def get_formfield(field, form_class=CharField, **kwargs):
     defaults = {'required': not field.blank, 'label': capfirst(field.verbose_name), 'help_text': field.help_text}

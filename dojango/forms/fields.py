@@ -10,7 +10,8 @@ __all__ = ['DojoFieldMixin', 'CharField', 'ChoiceField', 'TypedChoiceField',
            'DateField', 'TimeField', 'DateTimeField', 'SplitDateTimeField',
            'RegexField', 'DecimalField', 'FloatField', 'FilePathField',
            'MultipleChoiceField', 'NullBooleanField', 'EmailField',
-           'IPAddressField', 'URLField', 'MultiValueField', 'ComboField',]
+           'IPAddressField', 'URLField', 'SlugField', 'MultiValueField', 
+           'ComboField', ]
 
 class DojoFieldMixin(object):
     # the following field attributes will be passed
@@ -26,41 +27,14 @@ class DojoFieldMixin(object):
         'decimal_places',
         'js_regex', # special key for some dojo widgets
     ]
-    # TODO: remove that dependency
-    dojo_attrs = {
-        'required':'required',
-        'help_text':'promptMessage',
-        'min_value':'constraints.min',
-        'max_value':'constraints.max',
-        'max_length':'maxLength',
-        'max_digits':'maxDigits',
-        'decimal_places':'decimalPlaces',
-        'js_regex':'regExp',
-    }
     
     def widget_attrs(self, widget):
-        ret = {'extra_attrs': {}}
+        ret = {'extra_field_attrs': {}}
         for field_attr in self.passed_attrs:
             field_val = getattr(self, field_attr, None)
-            #print field_val, field_attr
+            #print field_attr, widget, field_val
             if field_val is not None:
-                ret['extra_attrs'][field_attr] = field_val
-        '''if getattr(self, "extra_dojo_attrs", False):
-            self.dojo_attrs.update(self.extra_dojo_attrs)'''
-        '''for field_attr in self.dojo_attrs:
-            field_val = getattr(self, field_attr, None)
-            if field_val is not None:
-                dojo_field_attr = self.dojo_attrs[field_attr].split(".")
-                inner_dict = ret
-                len_fields = len(dojo_field_attr)
-                count = 0
-                for i in dojo_field_attr:
-                    count = count+1
-                    if count == len_fields:
-                        inner_dict[i] = field_val
-                    elif not inner_dict.has_key(i):
-                        inner_dict[i] = {}
-                    inner_dict = inner_dict[i]'''
+                ret['extra_field_attrs'][field_attr] = field_val
         return ret
 
 class CharField(DojoFieldMixin, fields.CharField):
@@ -127,6 +101,10 @@ class IPAddressField(DojoFieldMixin, fields.IPAddressField):
     
 class URLField(DojoFieldMixin, fields.URLField):
     widget = widgets.URLTextInput
+
+class SlugField(DojoFieldMixin, fields.SlugField):
+    widget = widgets.ValidationTextInput
+    js_regex = '^[-\w]+$' # we cannot extract the original regex input from the python regex
     
 MultiValueField = fields.MultiValueField
 

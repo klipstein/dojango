@@ -1,5 +1,4 @@
 dojo.provide("dojango.dojango");
-dojo.require("dojo.date.stamp"); // needed for ovewriting the default isoRegExp
 
 dojango.registerModulePath = function(name, absoluteUrl, relativeUrl) {
     /*
@@ -38,6 +37,3 @@ dojango.registerModulePath("dojango", dojangoConfig.baseUrl + "/dojango", "../..
 
 // all required dojango functions must be loaded after the module registration
 dojo.require("dojango._base"); // we always include the basic functionality
-
-// django calculates the timezone, so we don't have to take care in the frontend
-dojo.date.stamp._isoRegExp = /^(?:(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(\d{2}):(\d{2})(?::(\d{2})(.\d+)?)?((?:[+-](\d{2}):(\d{2}))|Z)?)?$/;

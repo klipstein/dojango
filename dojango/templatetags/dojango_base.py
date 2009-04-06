@@ -33,3 +33,7 @@ def set_dojango_context(parser, token):
         return DojangoParamsNode(tlist[1][1:-1], tlist[2][1:-1])
     return DojangoParamsNode()
 
+# TODO: Implement template-tag for layout components to register e.g. dojoType="dijit.layout.TabContainer"
+# {% dojo_type "dijit.layout.TabContainer" %}
+# This template tag informs the collector about new modules
+
