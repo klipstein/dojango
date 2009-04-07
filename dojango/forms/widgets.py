@@ -15,7 +15,7 @@ from dojango.util import dojo_collector
 __all__ = (
     'DojoWidgetMixin', 'Input', 'Widget', 'TextInput', 'PasswordInput',
     'HiddenInput', 'MultipleHiddenInput', 'FileInput', 'Textarea',
-    'DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'Select', 
+    'DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'Select',
     'NullBooleanSelect', 'SelectMultiple', 'RadioInput', 'RadioFieldRenderer',
     'RadioSelect', 'CheckboxSelectMultiple', 'MultiWidget', 'SplitDateTimeWidget',
     'SplitHiddenDateTimeWidget', 'EditorInput', 'HorizontalSliderInput',
@@ -32,21 +32,21 @@ class DojoWidgetMixin:
     Some dojo widgets can utilize the validation information of a field and here
     we mixin those attributes into the widget. Field attributes that are listed
     in the 'valid_extra_attrs' will be mixed into the attributes of a widget.
-    
+
     The 'default_field_attr_map' property contains the default mapping of field
     attributes to dojo widget attributes.
-    
+
     This mixin also takes care passing the required dojo modules to the collector.
     'dojo_type' defines the used dojo module type of this widget and adds this
-    module to the collector, if no 'alt_require' property is defined. When 
+    module to the collector, if no 'alt_require' property is defined. When
     'alt_require' is set, this module will be passed to the collector. By using
     'extra_dojo_require' it is possible to pass additional dojo modules to the
     collector.
     """
-    dojo_type = None # this is the dojoType definition of the widget. also used for generating the dojo.require call 
+    dojo_type = None # this is the dojoType definition of the widget. also used for generating the dojo.require call
     alt_require = None # alternative dojo.require call (not using the dojo_type)
     extra_dojo_require = [] # these dojo modules also needs to be loaded for this widget
-    
+
     default_field_attr_map = { # the default map for mapping field attributes to dojo attributes
         'required':'required',
         'help_text':'promptMessage',
@@ -60,14 +60,14 @@ class DojoWidgetMixin:
     }
     field_attr_map = {} # used for overwriting the default attr-map
     valid_extra_attrs = [] # these field_attributes are valid for the current widget
-    
+
     def _mixin_attr(self, attrs, key, value):
         """Mixes in the passed key/value into the passed attrs and returns that
         extended attrs dictionary.
-        
-        A 'key', that is separated by a dot, e.g. 'constraints.min', will be 
+
+        A 'key', that is separated by a dot, e.g. 'constraints.min', will be
         added as:
-        
+
         {'constraints':{'min':value}}
         """
         dojo_field_attr = key.split(".")
@@ -92,10 +92,10 @@ class DojoWidgetMixin:
                 inner_dict[i] = {}
             inner_dict = inner_dict[i]
         return attrs
-    
+
     def build_attrs(self, extra_attrs=None, **kwargs):
         """Overwritten helper function for building an attribute dictionary.
-        This helper also takes care passing the used dojo modules to the 
+        This helper also takes care passing the used dojo modules to the
         collector. Furthermore it mixes in the used field attributes into the
         attributes of this widget.
         """
@@ -104,12 +104,12 @@ class DojoWidgetMixin:
         self.default_field_attr_map.update(self.field_attr_map) # the field-attribute-mapping can be customzied
         if extra_attrs:
             attrs.update(extra_attrs)
-        
+
         # assigning dojoType to our widget
         dojo_type = getattr(self, "dojo_type", False)
         if dojo_type:
             attrs["dojoType"] = dojo_type # add the dojoType attribute
-            
+
         # fill the global collector object
         if getattr(self, "alt_require", False):
             dojo_collector.add_module(self.alt_require)
@@ -118,7 +118,7 @@ class DojoWidgetMixin:
         extra_requires = getattr(self, "extra_dojo_require", [])
         for i in extra_requires:
             dojo_collector.add_module(i)
-        
+
         # mixin those additional field attrs, that are valid for this widget
         extra_field_attrs = attrs.get("extra_field_attrs", False)
         if extra_field_attrs:
@@ -128,7 +128,7 @@ class DojoWidgetMixin:
                 if field_val is not None and new_attr_name is not None:
                     attrs = self._mixin_attr(attrs, new_attr_name, field_val)
             del attrs["extra_field_attrs"]
-        
+
         # now encode several attributes, e.g. False = false, True = true
         for i in attrs:
             if isinstance(attrs[i], bool):
@@ -158,10 +158,10 @@ class PasswordInput(DojoWidgetMixin, widgets.PasswordInput):
     ]
 
 class HiddenInput(DojoWidgetMixin, widgets.HiddenInput):
-    dojo_type = None
+    dojo_type = 'dijit.form.TextBox' # otherwise dijit.form.Form can't get its values
 
 class MultipleHiddenInput(DojoWidgetMixin, widgets.MultipleHiddenInput):
-    dojo_type = None
+    dojo_type = 'dijit.form.TextBox' # otherwise dijit.form.Form can't get its values
 
 class FileInput(DojoWidgetMixin, widgets.FileInput):
     dojo_type = 'dojox.form.FileInput'
@@ -236,12 +236,12 @@ class NullBooleanSelect(DojoWidgetMixin, widgets.NullBooleanSelect):
 class SelectMultiple(DojoWidgetMixin, widgets.SelectMultiple):
     dojo_type = 'dijit.form.MultiSelect'
 
-RadioInput = widgets.RadioInput    
+RadioInput = widgets.RadioInput
 RadioFieldRenderer = widgets.RadioFieldRenderer
 
 class RadioSelect(DojoWidgetMixin, widgets.RadioSelect):
     dojo_type = 'dijit.form.RadioButton'
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.alt_require = 'dijit.form.CheckBox'
@@ -249,7 +249,7 @@ class RadioSelect(DojoWidgetMixin, widgets.RadioSelect):
 
 class CheckboxSelectMultiple(DojoWidgetMixin, widgets.CheckboxSelectMultiple):
     dojo_type = 'dijit.form.CheckBox'
-    
+
 class MultiWidget(DojoWidgetMixin, widgets.MultiWidget):
     dojo_type = None
 
@@ -257,7 +257,7 @@ class SplitDateTimeWidget(widgets.SplitDateTimeWidget):
     "DateTimeInput is using two input fields."
     date_format = DateInput.format
     time_format = TimeInput.format
-    
+
     def __init__(self, attrs=None, date_format=None, time_format=None):
         if date_format:
             self.date_format = date_format
@@ -271,7 +271,7 @@ class SplitDateTimeWidget(widgets.SplitDateTimeWidget):
 
 class SplitHiddenDateTimeWidget(DojoWidgetMixin, widgets.SplitHiddenDateTimeWidget):
     dojo_type = None
-    
+
 DateTimeInput = SplitDateTimeWidget
 
 #############################################
@@ -280,7 +280,7 @@ DateTimeInput = SplitDateTimeWidget
 
 class EditorInput(Textarea):
     dojo_type = 'dijit.Editor'
-    
+
     def render(self, name, value, attrs=None):
         if value is None: value = ''
         final_attrs = self.build_attrs(attrs, name=name)
@@ -290,7 +290,7 @@ class EditorInput(Textarea):
 
 class HorizontalSliderInput(TextInput):
     dojo_type = 'dijit.form.HorizontalSlider'
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.alt_require = 'dijit.form.Slider'
@@ -298,7 +298,7 @@ class HorizontalSliderInput(TextInput):
 
 class VerticalSliderInput(TextInput):
     dojo_type = 'dijit.form.VerticalSlider'
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.alt_require = 'dijit.form.Slider'
@@ -313,7 +313,7 @@ class ValidationTextInput(TextInput):
         'max_length',
     ]
     js_regex_func = None
-    
+
     def render(self, name, value, attrs=None):
         if self.js_regex_func:
             attrs = self.build_attrs(attrs, regExpGen=self.js_regex_func)
@@ -333,34 +333,34 @@ class EmailTextInput(ValidationTextInput):
         'dojox.validate.regexp'
     ]
     js_regex_func = "dojox.validate.regexp.emailAddress"
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.js_regex_func = 'dojox.regexp.emailAddress'
         super(EmailTextInput, self).__init__(attrs)
-    
+
 class IPAddressTextInput(ValidationTextInput):
     extra_dojo_require = [
         'dojox.validate.regexp'
     ]
     js_regex_func = "dojox.validate.regexp.ipAddress"
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.js_regex_func = 'dojox.regexp.ipAddress'
         super(IPAddressTextInput, self).__init__(attrs)
-    
+
 class URLTextInput(ValidationTextInput):
     extra_dojo_require = [
         'dojox.validate.regexp'
     ]
     js_regex_func = "dojox.validate.regexp.url"
-    
+
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.js_regex_func = 'dojox.regexp.url'
         super(URLTextInput, self).__init__(attrs)
-    
+
 class NumberTextInput(TextInput):
     dojo_type = 'dijit.form.NumberTextBox'
     valid_extra_attrs = [
@@ -370,10 +370,10 @@ class NumberTextInput(TextInput):
         'help_text',
         'decimal_places',
     ]
-    
+
 class RangeBoundTextInput(NumberTextInput):
     dojo_type = 'dijit.form.RangeBoundTextBox'
-    
+
 class NumberSpinnerInput(NumberTextInput):
     dojo_type = 'dijit.form.NumberSpinner'
 
@@ -385,7 +385,7 @@ class RatingInput(TextInput):
     field_attr_map = {
         'max_value': 'numStars',
     }
-    
+
     class Media:
         css = {
             'all': ('%(base_url)s/dojox/form/resources/Rating.css' % {
@@ -401,7 +401,7 @@ class DateInputAnim(DateInput):
                 'base_url':dojo_config.dojo_base_url
             },)
         }
-    
+
 class DropDownSelect(Select):
     dojo_type = 'dojox.form.DropDownSelect'
     class Media:
@@ -414,7 +414,7 @@ class DropDownSelect(Select):
 class CheckedMultiSelect(Select):
     dojo_type = 'dojox.form.CheckedMultiSelect'
     # TODO: fix attribute multiple=multiple
-    
+
     class Media:
         css = {
             'all': ('%(base_url)s/dojox/form/resources/CheckedMultiSelect.css' % {
