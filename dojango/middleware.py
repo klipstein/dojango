@@ -3,7 +3,7 @@ import re
 from django.conf import settings
 from django.http import HttpResponseServerError
 
-from dojango.forms import collector
+from dojango.util import dojo_collector
 
 class AJAXSimpleExceptionResponse:
     """Thanks to newmaniese of http://www.djangosnippets.org/snippets/650/ .
@@ -36,10 +36,10 @@ class DojoAutoRequireMiddleware:
     request. It is needed, when the dojango.forms integration is used.
     """
     def process_request(self, request):
-        collector.activate()
+        dojo_collector.activate()
 
     def process_response(self, request, response):
-        collector.deactivate()
+        dojo_collector.deactivate()
         return response
     
 class DojoRequireResponse:

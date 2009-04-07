@@ -10,7 +10,7 @@ from django.utils import datetime_safe
 from dojango.util import json_encode
 from dojango.util.config import Config
 
-from dojango.forms import collector
+from dojango.util import dojo_collector
 
 __all__ = (
     'DojoWidgetMixin', 'Input', 'Widget', 'TextInput', 'PasswordInput',
@@ -112,12 +112,12 @@ class DojoWidgetMixin:
             
         # fill the global collector object
         if getattr(self, "alt_require", False):
-            collector.add_module(self.alt_require)
+            dojo_collector.add_module(self.alt_require)
         elif dojo_type:
-            collector.add_module(self.dojo_type)
+            dojo_collector.add_module(self.dojo_type)
         extra_requires = getattr(self, "extra_dojo_require", [])
         for i in extra_requires:
-            collector.add_module(i)
+            dojo_collector.add_module(i)
         
         # mixin those additional field attrs, that are valid for this widget
         extra_field_attrs = attrs.get("extra_field_attrs", False)

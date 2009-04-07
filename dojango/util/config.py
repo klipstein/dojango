@@ -1,5 +1,5 @@
 from dojango.conf import settings # using the app-specific settings
-from dojango.forms import collector
+import dojo_collector
 
 class Config:
 
@@ -58,7 +58,7 @@ class Config:
         ret['DOJO_SRC_FILE'] = self.dojo_src_file()
         ret['DOJANGO_SRC_FILE'] = self.dojango_src_file()
         ret['DEBUG'] = settings.DOJO_DEBUG
-        ret['COLLECTOR'] = collector.get_modules()
+        ret['COLLECTOR'] = dojo_collector.get_modules()
         return ret
 
     def dojo_src_file(self):
