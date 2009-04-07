@@ -1,3 +1,5 @@
+import datetime
+
 from django.forms import widgets
 from django.utils.encoding import StrAndUnicode, force_unicode
 from django.utils.html import conditional_escape
@@ -75,6 +77,16 @@ class DojoWidgetMixin:
         for i in dojo_field_attr:
             count = count+1
             if count == len_fields and inner_dict.get(i, None) is None:
+                if isinstance(value, datetime.datetime):
+                    if isinstance(self, TimeInput):
+                        value = value.strftime('T%H:%M:%S')
+                    if isinstance(self, DateInput):
+                        value = value.strftime('%Y-%m-%d')
+                    value = str(value).replace(' ', 'T') # see dojo.date.stamp
+                if isinstance(value, datetime.date):
+                    value = str(value)
+                if isinstance(value, datetime.time):
+                    value = "T" + str(value) # see dojo.date.stamp
                 inner_dict[i] = value
             elif not inner_dict.has_key(i):
                 inner_dict[i] = {}
@@ -164,10 +176,13 @@ class Textarea(DojoWidgetMixin, widgets.Textarea):
     dojo_type = 'dijit.form.Textarea'
 
 class DateInput(TextInput):
+    """Copy of the implementation in Django 1.1. Before this widget did not exists."""
     dojo_type = 'dijit.form.DateTextBox'
     valid_extra_attrs = [
         'required',
         'help_text',
+        'min_value',
+        'max_value',
     ]
     format = '%Y-%m-%d'     # '2006-10-25'
     def __init__(self, attrs=None, format=None):
@@ -184,10 +199,13 @@ class DateInput(TextInput):
         return super(DateInput, self).render(name, value, attrs)
 
 class TimeInput(TextInput):
+    """Copy of the implementation in Django 1.1. Before this widget did not exists."""
     dojo_type = 'dijit.form.TimeTextBox'
     valid_extra_attrs = [
         'required',
         'help_text',
+        'min_value',
+        'max_value',
     ]
     format = "T%H:%M:%S"    # special for dojo: 'T12:12:33'
     def __init__(self, attrs=None, format=None):

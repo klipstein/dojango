@@ -73,12 +73,27 @@ class ImageField(DojoFieldMixin, fields.ImageField):
 
 class DateField(CharField):
     widget = widgets.DateInput
+    
+    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+        self.max_value = max_value
+        self.min_value = min_value
+        super(DateField, self).__init__(*args, **kwargs)
 
 class TimeField(CharField):
     widget = widgets.TimeInput
+    
+    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+        self.max_value = max_value
+        self.min_value = min_value
+        super(TimeField, self).__init__(*args, **kwargs)
 
 class DateTimeField(CharField):
     widget = widgets.DateTimeInput
+    
+    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+        self.max_value = max_value
+        self.min_value = min_value
+        super(DateTimeField, self).__init__(*args, **kwargs)
     
 SplitDateTimeField = DateTimeField # datetime input is always splitted
     
