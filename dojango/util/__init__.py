@@ -118,6 +118,10 @@ def json_encode(data):
             # For dojo.date.stamp we convert the dates to use 'T' as separator instead of space
             # i.e. 2008-01-01T10:10:10 instead of 2008-01-01 10:10:10
             ret = str(data).replace(' ', 'T')
+        elif isinstance(data, datetime.date):
+            ret = str(data)
+        elif isinstance(data, datetime.time):
+            ret = "T" + str(data)
         else:
             ret = data
         return ret
@@ -154,7 +158,6 @@ def json_encode(data):
         return ret
     
     ret = _any(data)
-    
     return json.dumps(ret, cls=DateTimeAwareJSONEncoder)
 
 def json_decode(json_string):
