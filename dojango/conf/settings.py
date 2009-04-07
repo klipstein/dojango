@@ -4,7 +4,7 @@ from django.conf import settings
 DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 
-DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.2.3")
+DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.3")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "google")
 
 BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/media')
@@ -27,9 +27,9 @@ DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you 
 # - use_gfx: there is a special case, when using dojox.gfx from aol (see http://dev.aol.com/dojo)
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
-_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3',)
+_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0',)
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
-_google_versions = ('1.1.1', '1.2.0', '1.2.3',)
+_google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0',)
 DOJO_PROFILES = {
     'google': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
@@ -50,7 +50,7 @@ DOJO_PROFILES.update(getattr(settings, "DOJANGO_DOJO_PROFILES", {}))
 # =============================================================================================
 # general doc: http://dojotoolkit.org/book/dojo-book-0-9/part-4-meta-dojo/package-system-and-custom-builds
 # see http://www.sitepen.com/blog/2008/04/02/dojo-mini-optimization-tricks-with-the-dojo-toolkit/ for details
-DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.2.0')
+DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.3')
 # this is the default build profile, that is used, when calling "./manage.py dojobuild"
 # "./manage.py dojobuild dojango" would would have the same effect
 DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
@@ -73,7 +73,7 @@ DOJO_BUILD_PROFILES = {
     'dojango_optimized': {
         'profile_file': '%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js',
         'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
-        'build_version': 'dojango-optimized-with-dojo%(DOJO_BUILD_VERSION)s',
+        'build_version': '%(DOJO_BUILD_VERSION)sdojango-optimized-with-dojo',
     },
 }
 
@@ -85,7 +85,7 @@ DOJO_BUILD_PROFILES_DEFAULT = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES_DEF
     # use a formatting string, so this can be set in the project's settings.py without getting the dojango settings
     'base_root': '%(BASE_MEDIA_ROOT)s/release',
     'used_src_version': '%(DOJO_BUILD_VERSION)s',
-    'build_version': 'dojango-with-dojo%(DOJO_BUILD_VERSION)s',
+    'build_version': '%(DOJO_BUILD_VERSION)sdojango-with-dojo',
 })
 # TODO: we should also enable the already pre-delivered dojo default profiles
 
@@ -94,4 +94,4 @@ DOJO_BUILD_PROFILES.update(getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES", {}))
 DOJO_BUILD_JAVA_EXEC = getattr(settings, 'DOJANGO_DOJO_BUILD_JAVA_EXEC', 'java')
 # a version string that must have the following form: '1.0.0', '1.2.1', ....
 # this setting is used witin the dojobuild, because the build process changed since version 1.2.0
-DOJO_BUILD_USED_VERSION = getattr(settings, 'DOJANGO_DOJO_BUILD_USED_VERSION', '1.2.0')
+DOJO_BUILD_USED_VERSION = getattr(settings, 'DOJANGO_DOJO_BUILD_USED_VERSION', '1.3')
