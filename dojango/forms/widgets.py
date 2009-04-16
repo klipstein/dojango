@@ -101,10 +101,10 @@ class DojoWidgetMixin:
         """
         # gathering all widget attributes
         attrs = dict(self.attrs, **kwargs)
-        self.default_field_attr_map.update(self.field_attr_map) # the field-attribute-mapping can be customzied
+        field_attr = self.default_field_attr_map.copy() # use a copy of that object. otherwise changed field_attr_map would overwrite the default-map for all widgets!
+        field_attr.update(self.field_attr_map) # the field-attribute-mapping can be customzied
         if extra_attrs:
             attrs.update(extra_attrs)
-
         # assigning dojoType to our widget
         dojo_type = getattr(self, "dojo_type", False)
         if dojo_type:
@@ -124,7 +124,7 @@ class DojoWidgetMixin:
         if extra_field_attrs:
             for i in self.valid_extra_attrs:
                 field_val = extra_field_attrs.get(i, None)
-                new_attr_name = self.default_field_attr_map.get(i, None)
+                new_attr_name = field_attr.get(i, None)
                 if field_val is not None and new_attr_name is not None:
                     attrs = self._mixin_attr(attrs, new_attr_name, field_val)
             del attrs["extra_field_attrs"]
@@ -286,7 +286,7 @@ class EditorInput(Textarea):
         final_attrs = self.build_attrs(attrs, name=name)
         # dijit.Editor must be rendered in a div (see dijit/_editor/RichText.js)
         return mark_safe(u'<div%s>%s</div>' % (flatatt(final_attrs),
-                conditional_escape(force_unicode(value))))
+                force_unicode(value))) # we don't escape the value for the editor
 
 class HorizontalSliderInput(TextInput):
     dojo_type = 'dijit.form.HorizontalSlider'
