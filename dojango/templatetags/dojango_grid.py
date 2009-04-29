@@ -6,6 +6,7 @@ from django.template.loader import get_template
 from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.util.dojo_collector import add_module
 from dojango.conf import settings # using the app-specific settings
+from dojango.util.config import Config
 
 import random
 

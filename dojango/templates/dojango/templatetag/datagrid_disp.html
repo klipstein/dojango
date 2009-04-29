@@ -1,3 +1,10 @@
+{% load dojango_base %}
+{% set_dojango_context %}
+
+<link rel="stylesheet"
+        href="{{ DOJANGO.DOJO_URL }}x/grid/resources/{{DOJANGO.THEME}}Grid.css"
+        type="text/css" />
+        
 <script type="text/javascript">
 function {{id}}_noSort(row){ return !( false {{ nosort }} ) }
 dojo.addOnLoad(function(){ 
