@@ -94,4 +94,4 @@ class DatagridNode(template.Node):
                 for k,v in opts['query'].items():
                     opts['search_query']= "%s,'%s':'%s'"%(opts['search_query'],k,v)
         # return rendered template
-        return get_template("dojango/datagrid_disp.html").render(template.Context(opts))
+        return get_template("dojango/templatetag/datagrid_disp.html").render(template.Context(opts))
