@@ -54,7 +54,7 @@ class DatagridNode(template.Node):
             if insides.find('=')>0:
                 for key,val in [ opt.strip().split("=") for opt in insides.split("\n") if opt.find('=')>-1 ]:
                     opts[key.strip()]=eval(val.strip())
-        
+        opts['list_display'] = list(opts['list_display'])
         # Config for template
         opts['headers'] = []
         for f in opts['list_display']:
@@ -90,7 +90,8 @@ class DatagridNode(template.Node):
                 if not opts['query'].has_key("inclusions"): opts['query']['inclusions']=[]
                 opts['query']['inclusions'].append(f)
                 opts['headers'].append(tmp)
-
+        if opts.has_key("nosort"): 
+            opts['nosort'] = "".join(["||row==%s"%(opts['list_display'].index(r)+1) for r in opts['nosort']])
         # additional context info
         opts["model_name"] = self.model_name
         opts["app_name"] = self.app_name

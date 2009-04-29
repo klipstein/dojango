@@ -1,4 +1,5 @@
 <script type="text/javascript">
+function {{id}}_noSort(row){ return !( false {{ nosort }} ) }
 dojo.addOnLoad(function(){ 
     var {{id}}_store=new dojox.data.QueryReadStore({ url: "/dojango/disp/{{app_name}}/{{model_name}}" });
     var {{id}}_layout=[
@@ -10,6 +11,7 @@ dojo.addOnLoad(function(){
     var {{id}}= new dojox.grid.DataGrid({
      jsid: '{{id}}', id:'{{id}}',
      store: {{id}}_store, structure:{{id}}_layout,
+     canSort: {{id}}_noSort,
     {% if query %}
      query: {{query|safe}}
     {% endif %}
