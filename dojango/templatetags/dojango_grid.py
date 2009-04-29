@@ -7,6 +7,11 @@ from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.util.dojo_collector import add_module
 from dojango.conf import settings # using the app-specific settings
 
+import random
+
+register = template.Library()
+disp_list_guid = 0
+
 @register.tag
 def simple_datagrid(parser,token):
     bits = token.split_contents()
