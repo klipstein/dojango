@@ -68,9 +68,13 @@ class DatagridNode(template.Node):
                     f.label = opts['label'][f.attname]
                 else:
                     f.label = f.name.replace('_', ' ')
+                if opts.has_key('formatter') and opts['formatter'].has_key(f.attname):
+                    f.formatter = opts['formatter'][f.attname]
                 opts['headers'].append(f)
             else:
                 tmp = {'attname':f}
+                if opts.has_key('formatter') and opts['formatter'].has_key(f):
+                    tmp['formatter'] = opts['formatter'][f]
                 if opts.has_key('label') and opts['label'].has_key(f):
                     tmp['label'] = opts['label'][f]
                 else:

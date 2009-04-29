@@ -166,6 +166,7 @@ def disp(request,app_name, model_name):
     # custom options passed from "query" param in datagrid
     for key in [ d for d in request.GET.keys() if not d in AVAILABLE_OPTS]:
         target = target.filter(**{str(key):request.GET[key]})
+    num = target.count()
     # get only the limit number of models with a given offset
     target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
     
@@ -183,4 +184,4 @@ def disp(request,app_name, model_name):
             for k in request.GET['inclusions'].split(','):
                 ret[k] = getattr(data,k)()
         complete.append(ret)
-    return to_dojo_data(complete, num_rows=len(complete))
+    return to_dojo_data(complete, num_rows=num)
