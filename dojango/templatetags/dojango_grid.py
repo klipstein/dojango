@@ -93,10 +93,6 @@ class DatagridNode(template.Node):
         if opts.has_key('query') and opts['query'].has_key("inclusions"):
              opts['query']['inclusions'] = ",".join(opts['query']['inclusions'])
         # generate js search query
-        if opts.has_key('search'): 
-            opts['search_query'] = ",".join("'%s':val"%x for x in opts['search'])
-            if opts.has_key('query'):
-                for k,v in opts['query'].items():
-                    opts['search_query']= "%s,'%s':'%s'"%(opts['search_query'],k,v)
+        if opts.has_key('search'):  opts['search_fields'] = ",".join(opts['search'])
         # return rendered template
         return get_template("dojango/templatetag/datagrid_disp.html").render(template.Context(opts))

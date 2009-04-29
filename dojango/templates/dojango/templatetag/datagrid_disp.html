@@ -17,16 +17,19 @@ dojo.addOnLoad(function(){
    {{id}}.startup();
 });
 
-{% if search_query %}
+{% if search_fields %}
     var {{id}}_last = "";
     function do_{{id}}_search(el) {
         if (el.value!={{id}}_last) {
             {{id}}_last = el.value;
-            val = el.value;
-            dijit.byId("{{id}}").filter({ {{search_query|safe}} },true);
+            dijit.byId("{{id}}").filter( {
+                search:el.value, search_fields: '{{search_fields}}',
+                {% for k, v in query.items %}  '{{k}}':'{{v}}', 
+                {%endfor%} 
+                },true );
         }
     }
 {% endif %}
 </script>
-{% if search_query %}<div dojoType="dojox.layout.ContentPane" style="width:{{width}};height:20px" >&nbsp;Search:<input style="border:solid 1px #ccc;margin-left:10px" type=text onkeyup="do_{{id}}_search(this)" /></div>{% endif %}
+{% if search_fields %}<div dojoType="dojox.layout.ContentPane" style="width:{{width}};height:20px" >&nbsp;Search:<input style="border:solid 1px #ccc;margin-left:10px" type=text onkeyup="do_{{id}}_search(this)" /></div>{% endif %}
 <div id="{{id}}_container" dojoType="dojox.layout.ContentPane" style="width:{{width}}; height:{{height}}"></div>

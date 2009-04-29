@@ -8,6 +8,11 @@ from dojango.decorators import json_response
 from dojango.util import to_dojo_data
 from dojango.util.form import get_combobox_data
 
+import operator
+
+# prof included for people using http://www.djangosnippets.org/snippets/186/
+AVAILABLE_OPTS =  ('search_fields','prof','inclusions','sort','search','count','order','start') 
+    
 def test(request):
     return render_to_response('dojango/test.html')
 
@@ -154,11 +159,12 @@ def disp(request,app_name, model_name):
     if request.GET.has_key('sort'):
         target = target.order_by(request.GET['sort'])
     
-    #if request.GET.has_key('search') and hasattr(model, "JSON"):
-    #    target = target.filter(reduce(operator.or_, [models.Q(**{k: request.GET['search']}) for k in model.JSON.search]))
+    if request.GET.has_key('search') and request.GET.has_key('search_fields'):
+        ored = [models.Q(**{str(k).strip(): str(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
+        target = target.filter(reduce(operator.or_, ored))
     
     # custom options passed from "query" param in datagrid
-    for key in [ d for d in request.GET.keys() if not d in ('prof','inclusions','sort','search','count','order','start') ]:
+    for key in [ d for d in request.GET.keys() if not d in AVAILABLE_OPTS]:
         target = target.filter(**{str(key):request.GET[key]})
     # get only the limit number of models with a given offset
     target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
