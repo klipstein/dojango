@@ -1,6 +1,9 @@
 # Create your views here.
-
+from django.db.models import get_model
+from django.db import models
 from django.shortcuts import render_to_response
+
+from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.decorators import json_response
 from dojango.util import to_dojo_data
 from dojango.util.form import get_combobox_data
@@ -133,3 +136,45 @@ def test_states(request):
     
     # Convert the data into dojo.date-store compatible format.
     return to_dojo_data(ret, identifier='abbreviation')
+
+@json_response
+def disp(request,app_name, model_name):
+    #####################################
+    ###  WARNING: Security... yikes   ###
+    #####################################
+    
+    # get the model
+    model = get_model(app_name,model_name)
+    
+    # start with a very broad query set
+    target = model.objects.all()
+    
+    # modify query set based on the GET params, dont do the start/count splice
+    # until after all clauses added
+    if request.GET.has_key('sort'):
+        target = target.order_by(request.GET['sort'])
+    
+    #if request.GET.has_key('search') and hasattr(model, "JSON"):
+    #    target = target.filter(reduce(operator.or_, [models.Q(**{k: request.GET['search']}) for k in model.JSON.search]))
+    
+    # custom options passed from "query" param in datagrid
+    for key in [ d for d in request.GET.keys() if not d in ('prof','inclusions','sort','search','count','order','start') ]:
+        target = target.filter(**{str(key):request.GET[key]})
+    # get only the limit number of models with a given offset
+    target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
+    
+    # create a list of dict objects out of models for json conversion
+    complete = []
+    for data in target:        
+        ret = {}
+        for f in data._meta.fields:
+            ret[f.attname] = getattr(data, f.attname) #json_encode() this?
+        fields = dir(data.__class__) + ret.keys()
+        add_ons = [k for k in dir(data) if k not in fields]
+        for k in add_ons:
+            ret[k] = _any(getattr(data, k))
+        if request.GET.has_key('inclusions'):
+            for k in request.GET['inclusions'].split(','):
+                ret[k] = getattr(data,k)()
+        complete.append(ret)
+    return to_dojo_data(complete, num_rows=len(complete))
