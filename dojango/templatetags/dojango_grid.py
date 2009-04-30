@@ -6,7 +6,6 @@ from django.template.loader import get_template
 from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.util.dojo_collector import add_module
 from dojango.conf import settings # using the app-specific settings
-from dojango.util.config import Config
 
 import random
 
@@ -39,9 +38,9 @@ class DatagridNode(template.Node):
         # add dojo modules
         add_module("dojox.data.QueryReadStore")
         add_module("dojox.grid.DataGrid")
+        add_module("dojox.layout.ContentPane")
         
-        # Setable options, not listed: label, query, search
-        ## TODO, nosort
+        # Setable options, not listed: label, query, search, nosort
         opts['list_display'] = [x.attname for x in self.model._meta.fields]
         opts['column_width'] = {}
         opts['default_width'] = "auto"

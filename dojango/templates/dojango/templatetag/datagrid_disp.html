@@ -18,9 +18,9 @@ dojo.addOnLoad(function(){
     var {{id}}= new dojox.grid.DataGrid({
      jsid: '{{id}}', id:'{{id}}',
      store: {{id}}_store, structure:{{id}}_layout,
-     canSort: {{id}}_noSort,
+     canSort: {{id}}_noSort
     {% if query %}
-     query: {{query|safe}}
+     ,query: {{query|safe}}
     {% endif %}
    });
    dijit.byId("{{id}}_container").attr('content',{{id}}.domNode);
