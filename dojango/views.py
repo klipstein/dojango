@@ -2,6 +2,7 @@
 from django.db.models import get_model
 from django.db import models
 from django.shortcuts import render_to_response
+from django.conf import settings
 
 from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.decorators import json_response
@@ -142,8 +143,21 @@ def test_states(request):
     # Convert the data into dojo.date-store compatible format.
     return to_dojo_data(ret, identifier='abbreviation')
 
+def access_object(request, app_name, model_name, instance):
+    acl = getattr(settings, "DOJANGO_DATAGRID_ACCESS", [])
+    for x in acl:
+        try:
+            if x.find(".")>0:
+                app,model = x.split('.')
+                if app_name == app and model_name==model: return True
+            else:
+                if app_name == x or model_name==x: return True
+        except:
+            pass
+    return False
+
 @json_response
-def disp(request,app_name, model_name):
+def disp(request, app_name, model_name, access_callback=access_object):
     #####################################
     ###  WARNING: Security... yikes   ###
     #####################################
@@ -172,16 +186,17 @@ def disp(request,app_name, model_name):
     
     # create a list of dict objects out of models for json conversion
     complete = []
-    for data in target:        
-        ret = {}
-        for f in data._meta.fields:
-            ret[f.attname] = getattr(data, f.attname) #json_encode() this?
-        fields = dir(data.__class__) + ret.keys()
-        add_ons = [k for k in dir(data) if k not in fields]
-        for k in add_ons:
-            ret[k] = _any(getattr(data, k))
-        if request.GET.has_key('inclusions'):
-            for k in request.GET['inclusions'].split(','):
-                ret[k] = getattr(data,k)()
-        complete.append(ret)
+    for data in target:   
+        if access_callback(request, app_name, model_name, data):   
+            ret = {}
+            for f in data._meta.fields:
+                ret[f.attname] = getattr(data, f.attname) #json_encode() this?
+            fields = dir(data.__class__) + ret.keys()
+            add_ons = [k for k in dir(data) if k not in fields]
+            for k in add_ons:
+                ret[k] = _any(getattr(data, k))
+            if request.GET.has_key('inclusions'):
+                for k in request.GET['inclusions'].split(','):
+                    ret[k] = getattr(data,k)()
+            complete.append(ret)
     return to_dojo_data(complete, num_rows=num)
