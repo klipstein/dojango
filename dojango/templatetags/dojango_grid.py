@@ -52,7 +52,7 @@ class DatagridNode(template.Node):
     search:            list or tuple of fields to query against when searching
     nosort:            fields not to sort on
     formatter:         dict of attribute:js formatter function
-    
+    json_provider:     URL for the ReadQueryStore 
     """
     def __init__(self,app, model,options):
         self.model = get_model(app,model)
@@ -76,7 +76,7 @@ class DatagridNode(template.Node):
         opts['width'] = "100%"
         opts['height'] = "100%"
         opts['id'] = "disp_list_%s_%s"%(disp_list_guid,random.randint(10000,99999))
-        
+        opts['json_provider'] = '"/dojango/disp/%s/%s"'%(self.app_name,self.model_name)
         # User overrides
         if self.options:
             insides = self.options.render(context)
