@@ -14,17 +14,46 @@ disp_list_guid = 0
 
 @register.tag
 def simple_datagrid(parser,token):
+    """
+    Generates a dojo datagrid for a given app's model.
+    i.e.  {% simple_datagrid myapp mymodel %}
+    """
     bits = token.split_contents()
     return DatagridNode(bits[1],bits[2],None)
 
 @register.tag
 def datagrid(parser,token):
+    """
+     Generates a dojo datagrid for a given app's model. renders
+     the contents until {% enddatagrid %} and takes options in
+     the form of option=value per line.
+    """
     bits = token.split_contents()
     nodelist = parser.parse(('enddatagrid',))
     parser.delete_first_token()
     return DatagridNode(bits[1],bits[2],nodelist)
     
 class DatagridNode(template.Node):
+    """
+    If nodelist is not None this will render the contents under the templates
+    context then render the dojango/templatetag/datagrid_disp.html template
+    under a context created by the options parsed out of the block.
+    
+    Available options:
+    
+    list_display:      list or tuple of model attributes (model fields or model functions). defaults to all of the sql fields of the model
+    column_width:      dict with model attribute:width
+    default_width:     default width if not specified by column_width. defaults to "auto"
+    width:             width of the datagrid, defaults to "100%"
+    height:            height of datagrid, defaults to "100%"
+    id:                id of datagird, optional but useful to if planning on using dojo.connect to the grid.
+    label:             dict of attribute:label for header. (other ways exist of setting these)
+    query:             way to specify conditions for the table. i.e. to only display elements whose id>10: query={ 'id__gt':10 }
+    search:            list or tuple of fields to query against when searching
+    nosort:            fields not to sort on
+    formatter:         dict of attribute:js formatter function
+    
+    """
     def __init__(self,app, model,options):
         self.model = get_model(app,model)
         self.app_name = app
@@ -60,6 +89,7 @@ class DatagridNode(template.Node):
         for f in opts['list_display']:
             field = [x for x in self.model._meta.fields if x.attname==f]
             if len(field)>0:
+                ## Add as Field
                 f = field[0]
                 if opts['column_width'].has_key(f.attname): 
                      f.width = opts['column_width'][f.attname]
@@ -72,6 +102,7 @@ class DatagridNode(template.Node):
                     f.formatter = opts['formatter'][f.attname]
                 opts['headers'].append(f)
             else:
+                ## Create Dict with same attributes as Field that is used by template
                 tmp = {'attname':f}
                 if opts.has_key('formatter') and opts['formatter'].has_key(f):
                     tmp['formatter'] = opts['formatter'][f]
