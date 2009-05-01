@@ -10,10 +10,107 @@ from dojango.util import to_dojo_data
 from dojango.util.form import get_combobox_data
 
 import operator
-
-# prof included for people using http://www.djangosnippets.org/snippets/186/
-AVAILABLE_OPTS =  ('search_fields','prof','inclusions','sort','search','count','order','start') 
     
+# prof included for people using http://www.djangosnippets.org/snippets/186/
+AVAILABLE_OPTS =  ('search_fields','prof','inclusions','sort','search','count','order','start')
+ 
+def access_object(request, app_name, model_name, instance):
+    """
+    Return true to allow access to a given instance of app_name.model_name
+    """
+    acl = getattr(settings, "DOJANGO_DATAGRID_ACCESS", [])
+    for x in acl:
+        try:
+            if x.find(".")>0:
+                app,model = x.split('.')
+                if app_name == app and model_name==model: return True
+            else:
+                if app_name == x or model_name==x: return True
+        except:
+            pass
+    return False
+
+def access_field(request, app_name, model_name, field_name, instance):
+    """
+    Return true to allow access of a given field_name to model app_name.model_name given
+    a specific object of said model.
+    """
+    return not field_name in ('delete',)
+
+@json_response
+def disp(request, app_name, model_name, access_model_callback=access_object, access_field_callback=access_field):
+    """
+    Renders a json representation of a model within an app.  Set to handle GET params passed
+    by dojos ReadQueryStore for the dojango datagrid.  The following GET params are handled with
+    specially:
+      'search_fields','inclusions','sort','search','count','order','start'
+      
+    search_fields: list of fields for model to equal the search, each OR'd together.
+    search: see search_fields
+    sort: sets order_by
+    count: sets limit
+    start: sets offset
+    inclusions: list of functions in the model that will be called and result added to JSON
+     
+    any other GET param will be added to the filter on the model to determine what gets returned.  ie
+    a GET param of id__gt=5 will result in the equivalent of model.objects.all().filter( id__gt=5 )
+    
+    The access_model_callback is a function that gets passed the request, app_name, model_name, and
+    an instance of the model which will only be added to the json response if returned True
+    
+    The access_field_callback gets passed the request, app_name, model_name, field_name,
+    and the instance.  Return true to allow access of a given field_name to model 
+    app_name.model_name given instance model.
+    
+    The default callbacks will allow access to any model in added to the DOJANGO_DATAGRID_ACCESS
+    in settings.py and any function/field that is not "delete"
+    """
+    
+    # get the model
+    model = get_model(app_name,model_name)
+    
+    # start with a very broad query set
+    target = model.objects.all()
+    
+    # modify query set based on the GET params, dont do the start/count splice
+    # until after all clauses added
+    if request.GET.has_key('sort'):
+        target = target.order_by(request.GET['sort'])
+    
+    if request.GET.has_key('search') and request.GET.has_key('search_fields'):
+        ored = [models.Q(**{str(k).strip(): str(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
+        target = target.filter(reduce(operator.or_, ored))
+    
+    # custom options passed from "query" param in datagrid
+    for key in [ d for d in request.GET.keys() if not d in AVAILABLE_OPTS]:
+        target = target.filter(**{str(key):request.GET[key]})
+    num = target.count()
+    # get only the limit number of models with a given offset
+    target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
+    
+    # create a list of dict objects out of models for json conversion
+    complete = []
+    for data in target:   
+        if access_model_callback(request, app_name, model_name, data):   
+            ret = {}
+            for f in data._meta.fields:
+                if access_field_callback(request, app_name, model_name,f.attname, data): 
+                    ret[f.attname] = getattr(data, f.attname) #json_encode() this?
+            fields = dir(data.__class__) + ret.keys()
+            add_ons = [k for k in dir(data) if k not in fields and access_field_callback(request, app_name, model_name, k, data)]
+            for k in add_ons:
+                    ret[k] = _any(getattr(data, k))
+            if request.GET.has_key('inclusions'):
+                for k in request.GET['inclusions'].split(','):
+                    if access_field_callback(request, app_name, model_name, k, data): 
+                        ret[k] = getattr(data,k)()
+            complete.append(ret)
+    return to_dojo_data(complete, num_rows=num)
+
+#                                #########
+#                                 # Tests #
+#                                  #########
+
 def test(request):
     return render_to_response('dojango/test.html')
 
@@ -142,61 +239,3 @@ def test_states(request):
     
     # Convert the data into dojo.date-store compatible format.
     return to_dojo_data(ret, identifier='abbreviation')
-
-def access_object(request, app_name, model_name, instance):
-    acl = getattr(settings, "DOJANGO_DATAGRID_ACCESS", [])
-    for x in acl:
-        try:
-            if x.find(".")>0:
-                app,model = x.split('.')
-                if app_name == app and model_name==model: return True
-            else:
-                if app_name == x or model_name==x: return True
-        except:
-            pass
-    return False
-
-@json_response
-def disp(request, app_name, model_name, access_callback=access_object):
-    #####################################
-    ###  WARNING: Security... yikes   ###
-    #####################################
-    
-    # get the model
-    model = get_model(app_name,model_name)
-    
-    # start with a very broad query set
-    target = model.objects.all()
-    
-    # modify query set based on the GET params, dont do the start/count splice
-    # until after all clauses added
-    if request.GET.has_key('sort'):
-        target = target.order_by(request.GET['sort'])
-    
-    if request.GET.has_key('search') and request.GET.has_key('search_fields'):
-        ored = [models.Q(**{str(k).strip(): str(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
-        target = target.filter(reduce(operator.or_, ored))
-    
-    # custom options passed from "query" param in datagrid
-    for key in [ d for d in request.GET.keys() if not d in AVAILABLE_OPTS]:
-        target = target.filter(**{str(key):request.GET[key]})
-    num = target.count()
-    # get only the limit number of models with a given offset
-    target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
-    
-    # create a list of dict objects out of models for json conversion
-    complete = []
-    for data in target:   
-        if access_callback(request, app_name, model_name, data):   
-            ret = {}
-            for f in data._meta.fields:
-                ret[f.attname] = getattr(data, f.attname) #json_encode() this?
-            fields = dir(data.__class__) + ret.keys()
-            add_ons = [k for k in dir(data) if k not in fields]
-            for k in add_ons:
-                ret[k] = _any(getattr(data, k))
-            if request.GET.has_key('inclusions'):
-                for k in request.GET['inclusions'].split(','):
-                    ret[k] = getattr(data,k)()
-            complete.append(ret)
-    return to_dojo_data(complete, num_rows=num)
