@@ -2,29 +2,33 @@
 {% set_dojango_context %}
 
 <link rel="stylesheet"
-        href="{{ DOJANGO.DOJO_URL }}x/grid/resources/{{DOJANGO.THEME}}Grid.css"
+        href="{{ DOJANGO.DOJO_URL }}x/grid/resources/{{ DOJANGO.THEME }}Grid.css"
         type="text/css" />
         
 <script type="text/javascript">
+if(!dojango) dojango= new Object();
+if(!dojango._datagrid) dojango._datagrid= new Object();
+if(!dojango._datagrid._stores) dojango._datagrid._stores= new Object();
+
 function {{id}}_noSort(row){ return !( false {{ nosort }} ) }
 dojo.addOnLoad(function(){ 
-    {{id}}_store=new dojox.data.QueryReadStore({ url: "/dojango/disp/{{app_name}}/{{model_name}}" });
+    dojango._datagrid._stores.{{id}}=new dojox.data.QueryReadStore({ url: "/dojango/disp/{{app_name}}/{{model_name}}" });
     var {{id}}_layout=[
      {% for x in headers %}
          {field:"{{x.attname}}", name:"{{x.label|safe|capfirst}}", 
           width: "{{x.width}}" {% if x.formatter %}, formatter: {{x.formatter}} {% endif %}  },
      {% endfor %}
     ];
-    {{id}}= new dojox.grid.DataGrid({
+    dojango._datagrid.{{id}}= new dojox.grid.DataGrid({
      jsid: '{{id}}', id:'{{id}}',
-     store: {{id}}_store, structure:{{id}}_layout,
+     store: dojango._datagrid._stores.{{id}}, structure:{{id}}_layout,
      canSort: {{id}}_noSort
     {% if query %}
      ,query: {{query|safe}}
     {% endif %}
    });
-   dijit.byId("{{id}}_container").attr('content',{{id}}.domNode);
-   {{id}}.startup();
+   dijit.byId("{{id}}_container").attr('content',dojango._datagrid.{{id}}.domNode);
+   dojango._datagrid.{{id}}.startup();
 });
 
 {% if search_fields %}
@@ -33,7 +37,7 @@ function do_{{id}}_search(el) {
     if (el.value!={{id}}_last) {
         {{id}}_last = el.value;
 
-        dijit.byId("{{id}}").filter( {
+        dojango._datagrid.{{id}}.filter( {
             search:el.value, search_fields: '{{search_fields}}'
             {% for k, v in query.items %},'{{k}}':'{{v}}' {%endfor%} 
             },true );
