@@ -1,18 +1,20 @@
 {% load dojango_base %}
+{% load dojango_filters %}
 {% set_dojango_context %}
 
+{# TODO: Add a css loader to the dojo collector #}
 <link rel="stylesheet"
         href="{{ DOJANGO.DOJO_URL }}x/grid/resources/{{ DOJANGO.THEME }}Grid.css"
         type="text/css" />
         
 <script type="text/javascript">
-if(!dojango) dojango= new Object();
-if(!dojango._datagrid) dojango._datagrid= new Object();
-if(!dojango._datagrid._stores) dojango._datagrid._stores= new Object();
+if(typeof(dojango) == 'undefined') dojango= {};
+if(typeof(dojango._datagrid) == 'undefined') dojango._datagrid= {};
+if(typeof(dojango._datagrid._stores) == 'undefined') dojango._datagrid._stores= {};
 
 function {{id}}_noSort(row){ return !( false {{ nosort }} ) }
 dojo.addOnLoad(function(){ 
-    dojango._datagrid._stores.{{id}}=new dojox.data.QueryReadStore({ url: {{ json_provider|safe }} });
+    dojango._datagrid._stores.{{id}}=new dojox.data.QueryReadStore({ url: {{ json_store_url|json|safe }} });
     var {{id}}_layout=[
      {% for x in headers %}
          {field:"{{x.attname}}", name:"{{x.label|safe|capfirst}}", 
