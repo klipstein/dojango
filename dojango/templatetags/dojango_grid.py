@@ -1,11 +1,13 @@
 from django import template
 from django.db.models import get_model
 from django.db import models
+from django.template import TemplateSyntaxError
 from django.template.loader import get_template
 
 from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.util.dojo_collector import add_module
-from dojango.conf import settings # using the app-specific settings
+from dojango.util.perms import access_model
+from django.core.urlresolvers import reverse, NoReverseMatch
 
 import random
 
@@ -13,7 +15,7 @@ register = template.Library()
 disp_list_guid = 0
 
 @register.tag
-def simple_datagrid(parser,token):
+def simple_datagrid(parser, token):
     """
     Generates a dojo datagrid for a given app's model.
     i.e.  {% simple_datagrid myapp mymodel %}
@@ -22,7 +24,7 @@ def simple_datagrid(parser,token):
     return DatagridNode(bits[1],bits[2],None)
 
 @register.tag
-def datagrid(parser,token):
+def datagrid(parser, token):
     """
      Generates a dojo datagrid for a given app's model. renders
      the contents until {% enddatagrid %} and takes options in
@@ -52,18 +54,18 @@ class DatagridNode(template.Node):
     search:            list or tuple of fields to query against when searching
     nosort:            fields not to sort on
     formatter:         dict of attribute:js formatter function
-    json_provider:     URL for the ReadQueryStore 
+    json_store_url:    URL for the ReadQueryStore 
     """
-    def __init__(self,app, model,options):
+    def __init__(self, app, model, options):
         self.model = get_model(app,model)
         self.app_name = app
         self.model_name = model
         self.options = options
         
-    def render(self,context):
+    def render(self, context):
         opts = {}
         global disp_list_guid
-        disp_list_guid = disp_list_guid +1
+        disp_list_guid = disp_list_guid + 1
         # add dojo modules
         add_module("dojox.data.QueryReadStore")
         add_module("dojox.grid.DataGrid")
@@ -75,14 +77,21 @@ class DatagridNode(template.Node):
         opts['default_width'] = "auto"
         opts['width'] = "100%"
         opts['height'] = "100%"
-        opts['id'] = "disp_list_%s_%s"%(disp_list_guid,random.randint(10000,99999))
-        opts['json_provider'] = '"/dojango/disp/%s/%s"'%(self.app_name,self.model_name)
+        opts['id'] = "disp_list_%s_%s" % (disp_list_guid,random.randint(10000,99999))
+        try:
+            # reverse lookup of the datagrid-list url (see dojango/urls.py)
+            opts['json_store_url'] = reverse("dojango-datagrid-list", args=(self.app_name, self.model_name))
+        except NoReverseMatch:
+            pass
         # User overrides
         if self.options:
             insides = self.options.render(context)
             if insides.find('=')>0:
                 for key,val in [ opt.strip().split("=") for opt in insides.split("\n") if opt.find('=')>-1 ]:
                     opts[key.strip()]=eval(val.strip())
+        # we must ensure that the json_store_url is defined
+        if not opts.get('json_store_url', False):
+            raise TemplateSyntaxError, "Please enable the url 'dojango-datagrid-list' in your urls.py or pass a 'json_store_url' to the datagrid templatetag."
         opts['list_display'] = list(opts['list_display'])
         # Config for template
         opts['headers'] = []

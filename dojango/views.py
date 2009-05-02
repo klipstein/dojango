@@ -8,37 +8,15 @@ from dojango.util import json_response, to_dojo_data, json_encode
 from dojango.decorators import json_response
 from dojango.util import to_dojo_data
 from dojango.util.form import get_combobox_data
+from dojango.util.perms import access_model, access_model_field
 
 import operator
     
 # prof included for people using http://www.djangosnippets.org/snippets/186/
 AVAILABLE_OPTS =  ('search_fields','prof','inclusions','sort','search','count','order','start')
- 
-def access_object(request, app_name, model_name, instance):
-    """
-    Return true to allow access to a given instance of app_name.model_name
-    """
-    acl = getattr(settings, "DOJANGO_DATAGRID_ACCESS", [])
-    for x in acl:
-        try:
-            if x.find(".")>0:
-                app,model = x.split('.')
-                if app_name == app and model_name==model: return True
-            else:
-                if app_name == x or model_name==x: return True
-        except:
-            pass
-    return False
-
-def access_field(request, app_name, model_name, field_name, instance):
-    """
-    Return true to allow access of a given field_name to model app_name.model_name given
-    a specific object of said model.
-    """
-    return not field_name in ('delete',)
 
 @json_response
-def disp(request, app_name, model_name, access_model_callback=access_object, access_field_callback=access_field):
+def datagrid_list(request, app_name, model_name, access_model_callback=access_model, access_field_callback=access_model_field):
     """
     Renders a json representation of a model within an app.  Set to handle GET params passed
     by dojos ReadQueryStore for the dojango datagrid.  The following GET params are handled with
@@ -91,7 +69,7 @@ def disp(request, app_name, model_name, access_model_callback=access_object, acc
     # create a list of dict objects out of models for json conversion
     complete = []
     for data in target:   
-        if access_model_callback(request, app_name, model_name, data):   
+        if access_model_callback(app_name, model_name, request, data):   
             ret = {}
             for f in data._meta.fields:
                 if access_field_callback(request, app_name, model_name,f.attname, data): 
@@ -102,9 +80,11 @@ def disp(request, app_name, model_name, access_model_callback=access_object, acc
                     ret[k] = _any(getattr(data, k))
             if request.GET.has_key('inclusions'):
                 for k in request.GET['inclusions'].split(','):
-                    if access_field_callback(request, app_name, model_name, k, data): 
+                    if access_field_callback(app_name, model_name, k, request, data): 
                         ret[k] = getattr(data,k)()
             complete.append(ret)
+        else:
+            raise Exception, "You're not allowed to query the model '%s.%s' (add it to the array of the DOJANGO_DATAGRID_ACCESS setting)" % (model_name, app_name)
     return to_dojo_data(complete, num_rows=num)
 
 #                                #########
