@@ -29,7 +29,7 @@ DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you 
 # - is_local_build: profile being a locally builded version
 _aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0',)
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
-_google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0',)
+_google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', )
 DOJO_PROFILES = {
     'google': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':'http://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
