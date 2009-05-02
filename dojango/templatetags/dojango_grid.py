@@ -69,7 +69,6 @@ class DatagridNode(template.Node):
         # add dojo modules
         add_module("dojox.data.QueryReadStore")
         add_module("dojox.grid.DataGrid")
-        add_module("dojox.layout.ContentPane")
         
         # Setable options, not listed: label, query, search, nosort
         opts['list_display'] = [x.attname for x in self.model._meta.fields]
