@@ -4,7 +4,7 @@ from django.db import models
 from django.template import TemplateSyntaxError
 from django.template.loader import get_template
 
-from dojango.util import json_response, to_dojo_data, json_encode
+from dojango.util import json_response, to_dojo_data, json_encode, extract_nodelist_options
 from dojango.util.dojo_collector import add_module
 from dojango.util.perms import access_model
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -13,6 +13,7 @@ import random
 
 register = template.Library()
 disp_list_guid = 0
+ 
 
 @register.tag
 def simple_datagrid(parser, token):
@@ -34,7 +35,7 @@ def datagrid(parser, token):
     nodelist = parser.parse(('enddatagrid',))
     parser.delete_first_token()
     return DatagridNode(bits[1],bits[2],nodelist)
-    
+            
 class DatagridNode(template.Node):
     """
     If nodelist is not None this will render the contents under the templates
@@ -82,12 +83,11 @@ class DatagridNode(template.Node):
             opts['json_store_url'] = reverse("dojango-datagrid-list", args=(self.app_name, self.model_name))
         except NoReverseMatch:
             pass
+        
         # User overrides
         if self.options:
-            insides = self.options.render(context)
-            if insides.find('=')>0:
-                for key,val in [ opt.strip().split("=") for opt in insides.split("\n") if opt.find('=')>-1 ]:
-                    opts[key.strip()]=eval(val.strip())
+            opts.update(extract_nodelist_options(self.options,context))
+            
         # we must ensure that the json_store_url is defined
         if not opts.get('json_store_url', False):
             raise TemplateSyntaxError, "Please enable the url 'dojango-datagrid-list' in your urls.py or pass a 'json_store_url' to the datagrid templatetag."

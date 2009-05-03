@@ -71,6 +71,21 @@ except Exception:
             raise DjangoUnicodeDecodeError(s, *e.args)
         return s
 
+def extract_nodelist_options(nodelist, context=None):
+    """
+    Returns a dict containing the key=value options listed within the nodelist.
+    The value can be a python dict, list, tuple, or number/string literal.
+    """
+    ret={}
+    if context:
+        rendered = nodelist.render(context)
+    else:
+        rendered = nodelist.render({})
+    if rendered.find('=')>0:
+        for key,val in [ opt.strip().split("=") for opt in rendered.split("\n") if opt.find('=')>-1 ]:
+            ret[key.strip()]=eval(val.strip())
+    return ret 
+
 def debug(request):
     "Returns context variables helpful for debugging."
     context_extras = {}
