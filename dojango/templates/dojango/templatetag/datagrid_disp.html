@@ -37,7 +37,7 @@ dojo.addOnLoad(function(){
 });
 
 {% if search_fields %}
-var dojango._datagrid.{{id}}_last = "";
+dojango._datagrid.{{id}}_last = "";
 function do_{{id}}_search(el) {
     if (el.value != dojango._datagrid.{{id}}_last) {
         dojango._datagrid.{{id}}_last = el.value;
