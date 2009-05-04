@@ -106,7 +106,6 @@ class DatagridNode(template.Node):
         for field in opts['list_display']:
             ret = {'attname':field}
             for q in FIELD_ATTRIBUTES:
-                print q
                 if opts.has_key(q) and opts[q].has_key(field):
                      ret[q] = opts[q][field]
             # custom default logic

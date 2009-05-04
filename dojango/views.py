@@ -80,6 +80,7 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
                     ret[k] = _any(getattr(data, k))
             if request.GET.has_key('inclusions'):
                 for k in request.GET['inclusions'].split(','):
+                    if k == "": continue
                     if access_field_callback(app_name, model_name, k, request, data): 
                         ret[k] = getattr(data,k)()
             complete.append(ret)
