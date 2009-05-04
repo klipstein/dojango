@@ -14,6 +14,7 @@ import random
 register = template.Library()
 disp_list_guid = 0
  
+FIELD_ATTRIBUTES = ('column_width', 'label', 'formatter')
 
 @register.tag
 def simple_datagrid(parser, token):
@@ -35,7 +36,7 @@ def datagrid(parser, token):
     nodelist = parser.parse(('enddatagrid',))
     parser.delete_first_token()
     return DatagridNode(bits[1],bits[2],nodelist)
-            
+                 
 class DatagridNode(template.Node):
     """
     If nodelist is not None this will render the contents under the templates
@@ -45,7 +46,7 @@ class DatagridNode(template.Node):
     Available options:
     
     list_display:      list or tuple of model attributes (model fields or model functions). defaults to all of the sql fields of the model
-    column_width:      dict with model attribute:width
+    width:             dict with model attribute:width
     default_width:     default width if not specified by column_width. defaults to "auto"
     width:             width of the datagrid, defaults to "100%"
     height:            height of datagrid, defaults to "100%"
@@ -56,6 +57,7 @@ class DatagridNode(template.Node):
     nosort:            fields not to sort on
     formatter:         dict of attribute:js formatter function
     json_store_url:    URL for the ReadQueryStore 
+    selection_mode:    dojo datagrid selectionMode
     """
     def __init__(self, app, model, options):
         self.model = get_model(app,model)
@@ -73,10 +75,14 @@ class DatagridNode(template.Node):
         
         # Setable options, not listed: label, query, search, nosort
         opts['list_display'] = [x.attname for x in self.model._meta.fields]
-        opts['column_width'] = {}
+        opts['width'] = {}
+        opts['label'] = {}
         opts['default_width'] = "auto"
         opts['width'] = "100%"
         opts['height'] = "100%"
+        opts['query']={}
+        opts['query']['inclusions']=[]
+        
         opts['id'] = "disp_list_%s_%s" % (disp_list_guid,random.randint(10000,99999))
         try:
             # reverse lookup of the datagrid-list url (see dojango/urls.py)
@@ -91,52 +97,41 @@ class DatagridNode(template.Node):
         # we must ensure that the json_store_url is defined
         if not opts.get('json_store_url', False):
             raise TemplateSyntaxError, "Please enable the url 'dojango-datagrid-list' in your urls.py or pass a 'json_store_url' to the datagrid templatetag."
+        
+        # Incase list_display was passed as tuple, turn to list for mutability
         opts['list_display'] = list(opts['list_display'])
+        
         # Config for template
         opts['headers'] = []
-        for f in opts['list_display']:
-            field = [x for x in self.model._meta.fields if x.attname==f]
-            if len(field)>0:
-                ## Add as Field
-                f = field[0]
-                if opts['column_width'].has_key(f.attname): 
-                     f.width = opts['column_width'][f.attname]
-                else: f.width= opts['default_width']
-                if opts.has_key('label') and opts['label'].has_key(f.attname):
-                    f.label = opts['label'][f.attname]
-                else:
-                    f.label = f.name.replace('_', ' ')
-                if opts.has_key('formatter') and opts['formatter'].has_key(f.attname):
-                    f.formatter = opts['formatter'][f.attname]
-                opts['headers'].append(f)
-            else:
-                ## Create Dict with same attributes as Field that is used by template
-                tmp = {'attname':f}
-                if opts.has_key('formatter') and opts['formatter'].has_key(f):
-                    tmp['formatter'] = opts['formatter'][f]
-                if opts.has_key('label') and opts['label'].has_key(f):
-                    tmp['label'] = opts['label'][f]
-                else:
-                    try:
-                        tmp['label'] = getattr(self.model, f).short_description
-                    except AttributeError:
-                        tmp['label'] = f.replace('_', ' ')  
-                if opts['column_width'].has_key(f): 
-                    tmp['width']=opts['column_width'][f]
-                else: 
-                    tmp['width']= opts['default_width']
-                if not opts.has_key("query"): opts['query']={}
-                if not opts['query'].has_key("inclusions"): opts['query']['inclusions']=[]
-                opts['query']['inclusions'].append(f)
-                opts['headers'].append(tmp)
+        for field in opts['list_display']:
+            ret = {'attname':field}
+            for q in FIELD_ATTRIBUTES:
+                print q
+                if opts.has_key(q) and opts[q].has_key(field):
+                     ret[q] = opts[q][field]
+            # custom default logic
+            if not ret.has_key('label'):
+                try:
+                    ret['label'] = getattr(self.model, field).short_description
+                except AttributeError:
+                    ret['label'] = field.replace('_', ' ') 
+            if not ret.has_key('column_width'):
+                ret['column_width']= opts['default_width']
+            # add as inclusion if not a attribute of model
+            if not field in map(lambda x: x.attname, self.model._meta.fields):
+                opts['query']['inclusions'].append(field)
+            # add to header
+            opts['headers'].append(ret)
+              
+        # no sort fields
         if opts.has_key("nosort"): 
             opts['nosort'] = "".join(["||row==%s"%(opts['list_display'].index(r)+1) for r in opts['nosort']])
-        # additional context info
+        
+        # additional context info/modifications
         opts["model_name"] = self.model_name
         opts["app_name"] = self.app_name
-        if opts.has_key('query') and opts['query'].has_key("inclusions"):
-             opts['query']['inclusions'] = ",".join(opts['query']['inclusions'])
-        # generate js search query
+        opts['query']['inclusions'] = ",".join(opts['query']['inclusions'])
         if opts.has_key('search'):  opts['search_fields'] = ",".join(opts['search'])
+        
         # return rendered template
         return get_template("dojango/templatetag/datagrid_disp.html").render(template.Context(opts))

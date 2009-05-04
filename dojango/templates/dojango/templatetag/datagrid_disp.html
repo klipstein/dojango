@@ -20,7 +20,7 @@ dojo.addOnLoad(function(){
         {
             field:"{{x.attname}}", 
             name:"{{x.label|safe|capfirst}}",
-            width: "{{x.width}}" 
+            width: "{{x.column_width}}" 
             {% if x.formatter %}, formatter: {{x.formatter}} {% endif %}
         }{% if not forloop.last %},{% endif %}
     {% endfor %}
@@ -29,7 +29,7 @@ dojo.addOnLoad(function(){
         jsid:'{{id}}',
         id:'{{id}}',
         store:dojango._datagrid._stores.{{id}}, 
-        structure:{{id}}_layout,
+        structure:{{id}}_layout, {% if selection_mode %} selectionMode:'{{ selection_mode }}', {% endif %}
         canSort:{{id}}_noSort
         {% if query %},query:{{query|safe}}{% endif %}
    }, dojo.place(dojo.create("div"), dojo.byId("{{id}}_container")));
