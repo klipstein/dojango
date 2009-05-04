@@ -46,7 +46,7 @@ class DatagridNode(template.Node):
     Available options:
     
     list_display:      list or tuple of model attributes (model fields or model functions). defaults to all of the sql fields of the model
-    width:             dict with model attribute:width
+    column_width:      dict with model attribute:width
     default_width:     default width if not specified by column_width. defaults to "auto"
     width:             width of the datagrid, defaults to "100%"
     height:            height of datagrid, defaults to "100%"
