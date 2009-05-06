@@ -93,6 +93,7 @@ class DatagridNode(template.Node):
         # User overrides
         if self.options:
             opts.update(extract_nodelist_options(self.options,context))
+        if not opts['query'].has_key('inclusions'): opts['query']['inclusions'] = []
             
         # we must ensure that the json_store_url is defined
         if not opts.get('json_store_url', False):
