@@ -82,7 +82,13 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
                 for k in request.GET['inclusions'].split(','):
                     if k == "": continue
                     if access_field_callback(app_name, model_name, k, request, data): 
-                        ret[k] = getattr(data,k)()
+                        try:
+                            ret[k] = getattr(data,k)()
+                        except:
+                            try:
+                                ret[k] = eval("data.%s"%".".join(k.split("__")))
+                            except:
+                                ret[k] = getattr(data,k)
             complete.append(ret)
         else:
             raise Exception, "You're not allowed to query the model '%s.%s' (add it to the array of the DOJANGO_DATAGRID_ACCESS setting)" % (model_name, app_name)
