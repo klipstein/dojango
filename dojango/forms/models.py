@@ -25,30 +25,33 @@ class ModelMultipleChoiceField(DojoFieldMixin, models.ModelMultipleChoiceField):
 # here it is defined which form field is used by which model field, when creating a ModelForm
 MODEL_TO_FORM_FIELD_MAP = (
     # (model_field, form_field, [optional widget])
-    (fields.BooleanField, BooleanField),
-    (fields.CharField, CharField),
+    # the order of these fields is very important for inherited model fields
+    # e.g. the CharField must be checked at last, because several other
+    # fields are a subclass of it.
     (fields.CommaSeparatedIntegerField, CharField),
     (fields.DateTimeField, DateTimeField), # must be in front of the DateField
     (fields.DateField, DateField),
     (fields.DecimalField, DecimalField),
     (fields.EmailField, EmailField),
-    (fields.files.FileField, FileField),
     (fields.FilePathField, FilePathField),
     (fields.FloatField, FloatField),
     (fields.related.ForeignKey, ModelChoiceField),
     (fields.files.ImageField, ImageField),
-    (fields.IntegerField, IntegerField),
+    (fields.files.FileField, FileField),
     (fields.IPAddressField, IPAddressField),
     (fields.related.ManyToManyField, ModelMultipleChoiceField),
     (fields.NullBooleanField, CharField),
-    (fields.PositiveIntegerField, IntegerField),
+    (fields.BooleanField, BooleanField),
     (fields.PositiveSmallIntegerField, IntegerField),
+    (fields.PositiveIntegerField, IntegerField),
     (fields.SlugField, SlugField),
     (fields.SmallIntegerField, IntegerField),
-    (fields.TextField, CharField, Textarea),
+    (fields.IntegerField, IntegerField),
     (fields.TimeField, TimeField),
     (fields.URLField, URLField),
     (fields.XMLField, CharField, Textarea),
+    (fields.TextField, CharField, Textarea),
+    (fields.CharField, CharField),
 )
 
 def formfield_function(field):
