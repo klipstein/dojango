@@ -70,16 +70,16 @@
 	<body class="{{ DOJANGO.THEME }}">
 		{% block dojango_content %}
 		{% endblock %}
-	</body>
-    {% block dojango_require %}
-    	<script type="text/javascript">
-    		{% for require in DOJANGO.COLLECTOR %}
-    			{% spaceless %}
-    				dojo.require("{{ require }}");
-    			{% endspaceless %}
-    		{% endfor %}		
-    	</script>
-    {% endblock %}
+    	{% block dojango_require %}
+        	<script type="text/javascript">
+        		{% for require in DOJANGO.COLLECTOR %}
+        			{% spaceless %}
+        				dojo.require("{{ require }}");
+        			{% endspaceless %}
+        		{% endfor %}		
+        	</script>
+        {% endblock %}
+    </body>
 {% endblock %}
 
 </html>
