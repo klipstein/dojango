@@ -71,16 +71,15 @@
 		{% block dojango_content %}
 		{% endblock %}
 	</body>
-{% endblock %}
-
-{% block dojango_require %}
-	<script type="text/javascript">
-		{% for require in DOJANGO.COLLECTOR %}
-			{% spaceless %}
-				dojo.require("{{ require }}");
-			{% endspaceless %}
-		{% endfor %}		
-	</script>
+    {% block dojango_require %}
+    	<script type="text/javascript">
+    		{% for require in DOJANGO.COLLECTOR %}
+    			{% spaceless %}
+    				dojo.require("{{ require }}");
+    			{% endspaceless %}
+    		{% endfor %}		
+    	</script>
+    {% endblock %}
 {% endblock %}
 
 </html>
