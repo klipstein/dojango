@@ -59,6 +59,7 @@ class Config:
         ret['DOJANGO_SRC_FILE'] = self.dojango_src_file()
         ret['DEBUG'] = settings.DOJO_DEBUG
         ret['COLLECTOR'] = dojo_collector.get_modules()
+        ret['CDN_USE_SSL'] = settings.CDN_USE_SSL
         return ret
 
     def dojo_src_file(self):
