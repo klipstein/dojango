@@ -1,6 +1,6 @@
 import datetime
 
-from django.forms import widgets
+from django.forms import *
 from django.utils.encoding import StrAndUnicode, force_unicode
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
@@ -13,6 +13,7 @@ from dojango.util.config import Config
 from dojango.util import dojo_collector
 
 __all__ = (
+    'Media', 'MediaDefiningClass', # original django classes
     'DojoWidgetMixin', 'Input', 'Widget', 'TextInput', 'PasswordInput',
     'HiddenInput', 'MultipleHiddenInput', 'FileInput', 'Textarea',
     'DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'Select',

@@ -1,16 +1,17 @@
-from django.forms import fields
+from django.forms import *
 
 from dojango.forms import widgets
 from dojango.util import json_encode
 
 __all__ = (
-   'DojoFieldMixin', 'CharField', 'ChoiceField', 'TypedChoiceField',
-   'IntegerField', 'BooleanField', 'FileField', 'ImageField',
-   'DateField', 'TimeField', 'DateTimeField', 'SplitDateTimeField',
-   'RegexField', 'DecimalField', 'FloatField', 'FilePathField',
-   'MultipleChoiceField', 'NullBooleanField', 'EmailField',
-   'IPAddressField', 'URLField', 'SlugField', 'MultiValueField', 
-   'ComboField',
+    'Field', 'DEFAULT_DATE_INPUT_FORMATS', 'DEFAULT_TIME_INPUT_FORMATS', # original django classes
+    'DEFAULT_DATETIME_INPUT_FORMATS', 'MultiValueField', 'ComboField', # original django classes
+    'DojoFieldMixin', 'CharField', 'ChoiceField', 'TypedChoiceField',
+    'IntegerField', 'BooleanField', 'FileField', 'ImageField',
+    'DateField', 'TimeField', 'DateTimeField', 'SplitDateTimeField',
+    'RegexField', 'DecimalField', 'FloatField', 'FilePathField',
+    'MultipleChoiceField', 'NullBooleanField', 'EmailField',
+    'IPAddressField', 'URLField', 'SlugField',
 )
 
 class DojoFieldMixin(object):
@@ -71,7 +72,7 @@ class FileField(DojoFieldMixin, fields.FileField):
 class ImageField(DojoFieldMixin, fields.ImageField):
     widget = widgets.FileInput
 
-class DateField(CharField):
+class DateField(DojoFieldMixin, fields.DateField):
     widget = widgets.DateInput
     
     def __init__(self, min_value=None, max_value=None, *args, **kwargs):
@@ -79,10 +80,14 @@ class DateField(CharField):
         self.min_value = min_value
         super(DateField, self).__init__(*args, **kwargs)
 
-class TimeField(CharField):
+DEFAULT_TIME_INPUT_FORMATS = tuple(list(fields.DEFAULT_TIME_INPUT_FORMATS) + [
+    'T%H:%M:%S', 'T%H:%M'
+])
+class TimeField(DojoFieldMixin, fields.TimeField):
     widget = widgets.TimeInput
     
-    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+    def __init__(self, input_formats=None, min_value=None, max_value=None, *args, **kwargs):
+        kwargs['input_formats'] = input_formats or DEFAULT_TIME_INPUT_FORMATS
         self.max_value = max_value
         self.min_value = min_value
         super(TimeField, self).__init__(*args, **kwargs)
@@ -132,7 +137,3 @@ class URLField(DojoFieldMixin, fields.URLField):
 class SlugField(DojoFieldMixin, fields.SlugField):
     widget = widgets.ValidationTextInput
     js_regex = '^[-\w]+$' # we cannot extract the original regex input from the python regex
-    
-MultiValueField = fields.MultiValueField
-
-ComboField = fields.MultiValueField
