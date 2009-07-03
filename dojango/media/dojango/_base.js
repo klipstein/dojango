@@ -1,7 +1,5 @@
 dojo.provide("dojango._base");
 
 dojo.mixin(dojango, {
-    test: function(){
-        console.log("test");
-    }
+	// This where we can mixin functions that are directly accessbile via dojango.*
 });
