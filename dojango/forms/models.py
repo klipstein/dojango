@@ -1,17 +1,27 @@
-from django.forms import models
-from django.forms.forms import get_declared_fields
+from django.forms import *
+from django.forms.models import BaseModelFormSet
+from django.forms.models import BaseInlineFormSet
+from django.forms.models import ModelChoiceIterator
+from django.forms.models import InlineForeignKeyHiddenInput, InlineForeignKeyField
+
 from django.utils.text import capfirst
+
+from formsets import BaseFormSet
 
 from django.db.models import fields
 
 from dojango.forms.fields import *
-from dojango.forms.widgets import Textarea, Select, SelectMultiple
+from dojango.forms.widgets import DojoWidgetMixin, Textarea, Select, SelectMultiple, HiddenInput
 
-__all__ = ['ModelChoiceField', 'ModelMultipleChoiceField', 'ModelForm',]
-
+__all__ = (
+    'ModelForm', 'BaseModelForm', 'model_to_dict', 'fields_for_model',
+    'save_instance', 'form_for_fields', 'ModelChoiceField',
+    'ModelMultipleChoiceField',
+)
+    
 class ModelChoiceField(DojoFieldMixin, models.ModelChoiceField):
     """
-    Overwritten 'ModelChoiceField' using the 'DojoFieldMixin' functonality.
+    Overwritten 'ModelChoiceField' using the 'DojoFieldMixin' functionality.
     """
     widget = Select
 
@@ -20,6 +30,30 @@ class ModelMultipleChoiceField(DojoFieldMixin, models.ModelMultipleChoiceField):
     Overwritten 'ModelMultipleChoiceField' using the 'DojoFieldMixin' functonality.
     """
     widget = SelectMultiple
+
+# Fields #####################################################################
+
+class InlineForeignKeyHiddenInput(DojoWidgetMixin, InlineForeignKeyHiddenInput):
+    """
+    Overwritten InlineForeignKeyHiddenInput to use the dojango widget mixin
+    """
+    dojo_type = 'dijit.form.TextBox' # otherwise dijit.form.Form can't get its values
+
+class InlineForeignKeyField(DojoFieldMixin, InlineForeignKeyField, Field):
+    """
+    Overwritten InlineForeignKeyField to use the dojango field mixin and passing
+    the dojango InlineForeignKeyHiddenInput as widget.
+    """
+    def __init__(self, parent_instance, *args, **kwargs):
+        self.parent_instance = parent_instance
+        self.pk_field = kwargs.pop("pk_field", False)
+        if self.parent_instance is not None:
+            kwargs["initial"] = self.parent_instance.pk
+        kwargs["required"] = False
+        kwargs["widget"] = InlineForeignKeyHiddenInput
+        # don't call the the superclass of this one. Use the superclass of the 
+        # normal django InlineForeignKeyField
+        Field.__init__(self, *args, **kwargs)
 
 # our customized model field => form field map
 # here it is defined which form field is used by which model field, when creating a ModelForm
@@ -85,6 +119,13 @@ def formfield_function(field):
     # return the default formfield, if there is no equivalent
     return field.formfield()
 
+# ModelForms #################################################################
+
+def fields_for_model(*args, **kwargs):
+    """Changed fields_for_model function, where we use our own formfield_callback"""
+    kwargs["formfield_callback"] = formfield_function
+    return models.fields_for_model(*args, **kwargs)
+
 class ModelFormMetaclass(models.ModelFormMetaclass):
     """
     Overwritten 'ModelFormMetaClass'. We attach our own formfield generation
@@ -100,3 +141,63 @@ class ModelForm(models.ModelForm):
     Overwritten 'ModelForm' using the metaclass defined above.
     """
     __metaclass__ = ModelFormMetaclass
+
+def modelform_factory(*args, **kwargs):
+    """Changed modelform_factory function, where we use our own formfield_callback"""
+    kwargs["formfield_callback"] = formfield_function
+    kwargs["formset"] = BaseModelForm
+    return models.modelform_factory(*args, **kwargs)
+
+# ModelFormSets ##############################################################
+
+class BaseModelFormSet(BaseModelFormSet, BaseFormSet):
+    
+    def add_fields(self, form, index):
+        """Overwritten BaseModelFormSet using the dojango BaseFormSet and
+        the ModelChoiceField. 
+        NOTE: This method was copied from django 1.1"""
+        from django.db.models import AutoField, OneToOneField, ForeignKey
+        self._pk_field = pk = self.model._meta.pk
+        def pk_is_not_editable(pk):
+            return ((not pk.editable) or (pk.auto_created or isinstance(pk, AutoField))
+                or (pk.rel and pk.rel.parent_link and pk_is_not_editable(pk.rel.to._meta.pk)))
+        if pk_is_not_editable(pk) or pk.name not in form.fields:
+            try:
+                pk_value = self.get_queryset()[index].pk
+            except IndexError:
+                pk_value = None
+            if isinstance(pk, OneToOneField) or isinstance(pk, ForeignKey):
+                qs = pk.rel.to._default_manager.get_query_set()
+            else:
+                qs = self.model._default_manager.get_query_set()
+            form.fields[self._pk_field.name] = ModelChoiceField(qs, initial=pk_value, required=False, widget=HiddenInput)
+        BaseFormSet.add_fields(self, form, index)
+
+def modelformset_factory(*args, **kwargs):
+    """Changed modelformset_factory function, where we use our own formfield_callback"""
+    kwargs["formfield_callback"] = formfield_function
+    kwargs["formset"] = BaseModelFormSet
+    return models.modelformset_factory(*args, **kwargs)
+
+# InlineFormSets #############################################################
+
+class BaseInlineFormSet(BaseInlineFormSet, BaseModelFormSet):
+    """Overwritten BaseInlineFormSet using the dojango InlineForeignKeyFields.
+    NOTE: This method was copied from django 1.1"""
+    def add_fields(self, form, index):
+        super(BaseInlineFormSet, self).add_fields(form, index)
+        if self._pk_field == self.fk:
+            form.fields[self._pk_field.name] = InlineForeignKeyField(self.instance, pk_field=True)
+        else:
+            kwargs = {
+                'label': getattr(form.fields.get(self.fk.name), 'label', capfirst(self.fk.verbose_name))
+            }
+            if self.fk.rel.field_name != self.fk.rel.to._meta.pk.name:
+                kwargs['to_field'] = self.fk.rel.field_name
+            form.fields[self.fk.name] = InlineForeignKeyField(self.instance, **kwargs)
+            
+def inlineformset_factory(*args, **kwargs):
+    """Changed inlineformset_factory function, where we use our own formfield_callback"""
+    kwargs["formfield_callback"] = formfield_function
+    kwargs["formset"] = BaseInlineFormSet
+    return models.inlineformset_factory(*args, **kwargs)
