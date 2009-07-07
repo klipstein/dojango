@@ -92,7 +92,7 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
             complete.append(ret)
         else:
             raise Exception, "You're not allowed to query the model '%s.%s' (add it to the array of the DOJANGO_DATAGRID_ACCESS setting)" % (model_name, app_name)
-    return to_dojo_data(complete, num_rows=num)
+    return to_dojo_data(complete, identifier=model._meta.pk.name, num_rows=num)
 
 #                                #########
 #                                 # Tests #
