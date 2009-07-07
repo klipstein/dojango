@@ -23,7 +23,7 @@ __all__ = (
     'VerticalSliderInput', 'ValidationTextInput', 'ValidationPasswordInput',
     'EmailTextInput', 'IPAddressTextInput', 'URLTextInput', 'NumberTextInput',
     'RangeBoundTextInput', 'NumberSpinnerInput', 'RatingInput', 'DateInputAnim',
-    'DropDownSelect', 'CheckedMultiSelect',
+    'DropDownSelect', 'CheckedMultiSelect', 'ComboBox',
 )
 
 dojo_config = Config() # initialize the configuration
@@ -271,7 +271,7 @@ class SplitDateTimeWidget(widgets.SplitDateTimeWidget):
         widgets.MultiWidget.__init__(self, split_widgets, attrs)
 
 class SplitHiddenDateTimeWidget(DojoWidgetMixin, widgets.SplitHiddenDateTimeWidget):
-    dojo_type = None
+    dojo_type = "dijit.form.TextBox"
 
 DateTimeInput = SplitDateTimeWidget
 
@@ -405,6 +405,7 @@ class DateInputAnim(DateInput):
 
 class DropDownSelect(Select):
     dojo_type = 'dojox.form.DropDownSelect'
+    valid_extra_attrs = []
     class Media:
         css = {
             'all': ('%(base_url)s/dojox/form/resources/DropDownSelect.css' % {
@@ -412,9 +413,12 @@ class DropDownSelect(Select):
             },)
         }
 
-class CheckedMultiSelect(Select):
+class CheckedMultiSelect(SelectMultiple):
     dojo_type = 'dojox.form.CheckedMultiSelect'
-    # TODO: fix attribute multiple=multiple
+    valid_extra_attrs = []
+    # TODO: fix attribute multiple=multiple 
+    # seems there is a dependency in dojox.form.CheckedMultiSelect for dijit.form.MultiSelect,
+    # but CheckedMultiSelect is not extending that
 
     class Media:
         css = {
@@ -422,8 +426,13 @@ class CheckedMultiSelect(Select):
                 'base_url':dojo_config.dojo_base_url
             },)
         }
+
+class ComboBox(Select):
+    """Nearly the same as FilteringSelect, but ignoring the option value."""
+    dojo_type = 'dijit.form.ComboBox'
+
 # TODO: implement
-# dijit.form.ComboBox
+# dijit.form.ComboBox (the more extended case, that is using a store! ForeignKeyField ...)
 # dojox.form.RangeSlider
 # dojox.form.MultiComboBox
 # dojox.form.FileUploader
