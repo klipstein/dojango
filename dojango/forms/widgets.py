@@ -291,19 +291,22 @@ class EditorInput(Textarea):
 
 class HorizontalSliderInput(TextInput):
     dojo_type = 'dijit.form.HorizontalSlider'
+    valid_extra_attrs = [
+        'max_value',
+        'min_value',
+    ]
+    field_attr_map = {
+        'max_value': 'maximum',
+        'min_value': 'minimum',
+    }
 
     def __init__(self, attrs=None):
         if dojo_config.version < '1.3':
             self.alt_require = 'dijit.form.Slider'
         super(HorizontalSliderInput, self).__init__(attrs)
 
-class VerticalSliderInput(TextInput):
+class VerticalSliderInput(HorizontalSliderInput):
     dojo_type = 'dijit.form.VerticalSlider'
-
-    def __init__(self, attrs=None):
-        if dojo_config.version < '1.3':
-            self.alt_require = 'dijit.form.Slider'
-        super(VerticalSliderInput, self).__init__(attrs)
 
 class ValidationTextInput(TextInput):
     dojo_type = 'dijit.form.ValidationTextBox'
@@ -431,6 +434,21 @@ class ComboBox(Select):
     """Nearly the same as FilteringSelect, but ignoring the option value."""
     dojo_type = 'dijit.form.ComboBox'
 
+# THE RANGE SLIDER NEEDS A DIFFERENT REPRESENTATION IN THE FRONTEND
+# SOMETHING LIKE:
+# <div dojoType="dojox.form.RangeSlider"><input value="5"/><input value="10"/></div>
+'''class HorizontalRangeSlider(HorizontalSliderInput):
+    """This just can be used with a comma-separated-value like: 20,40"""
+    dojo_type = 'dojox.form.HorizontalRangeSlider'
+    alt_require = 'dojox.form.RangeSlider'
+
+    class Media:
+        css = {
+            'all': ('%(base_url)s/dojox/form/resources/RangeSlider.css' % {
+                'base_url':dojo_config.dojo_base_url
+            },)
+        }
+'''
 # TODO: implement
 # dijit.form.ComboBox (the more extended case, that is using a store! ForeignKeyField ...)
 # dojox.form.RangeSlider
