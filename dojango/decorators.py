@@ -78,7 +78,7 @@ def jsonp_response_custom(callback_param_name):
     
     You can add this decorator to a function like that:
     
-        @json_response_custom("my_callback_param")
+        @jsonp_response_custom("my_callback_param")
         def my_view(request):
             my_data = {'foo': 'bar'}
             return my_data
