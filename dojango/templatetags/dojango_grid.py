@@ -23,6 +23,8 @@ def simple_datagrid(parser, token):
     i.e.  {% simple_datagrid myapp mymodel %}
     """
     bits = token.split_contents()
+    if len(bits) < 3:
+        raise TemplateSyntaxError, "You have to pass app- and model-name to {% simple_datagrid app model %}"
     return DatagridNode(bits[1],bits[2],None)
 
 @register.tag
@@ -35,7 +37,11 @@ def datagrid(parser, token):
     bits = token.split_contents()
     nodelist = parser.parse(('enddatagrid',))
     parser.delete_first_token()
-    return DatagridNode(bits[1],bits[2],nodelist)
+    app, model = None, None
+    if len(bits) == 3:
+        app = bits[1]
+        model = bits[2]
+    return DatagridNode(app, model,nodelist)
                  
 class DatagridNode(template.Node):
     """
@@ -59,10 +65,15 @@ class DatagridNode(template.Node):
     json_store_url:    URL for the ReadQueryStore 
     selection_mode:    dojo datagrid selectionMode
     """
+    model = None
+    app_name = None
+    model_name = None
+
     def __init__(self, app, model, options):
-        self.model = get_model(app,model)
-        self.app_name = app
-        self.model_name = model
+        if app and model:
+            self.model = get_model(app,model)
+            self.app_name = app
+            self.model_name = model
         self.options = options
         
     def render(self, context):
@@ -74,7 +85,8 @@ class DatagridNode(template.Node):
         add_module("dojox.grid.DataGrid")
         
         # Setable options, not listed: label, query, search, nosort
-        opts['list_display'] = [x.attname for x in self.model._meta.fields]
+        if self.model:
+            opts['list_display'] = [x.attname for x in self.model._meta.fields]
         opts['width'] = {}
         opts['label'] = {}
         opts['default_width'] = "auto"
@@ -86,7 +98,8 @@ class DatagridNode(template.Node):
         opts['id'] = "disp_list_%s_%s" % (disp_list_guid,random.randint(10000,99999))
         try:
             # reverse lookup of the datagrid-list url (see dojango/urls.py)
-            opts['json_store_url'] = reverse("dojango-datagrid-list", args=(self.app_name, self.model_name))
+            if self.model:
+                opts['json_store_url'] = reverse("dojango-datagrid-list", args=(self.app_name, self.model_name))
         except NoReverseMatch:
             pass
         
@@ -100,6 +113,8 @@ class DatagridNode(template.Node):
             raise TemplateSyntaxError, "Please enable the url 'dojango-datagrid-list' in your urls.py or pass a 'json_store_url' to the datagrid templatetag."
         
         # Incase list_display was passed as tuple, turn to list for mutability
+        if not self.model and not opts.get('list_display', False):
+            raise TemplateSyntaxError, "'list_display' not defined. If you use your own 'json_store_url' you have to define which fields are visible."
         opts['list_display'] = list(opts['list_display'])
         
         # Config for template
@@ -118,7 +133,7 @@ class DatagridNode(template.Node):
             if not ret.has_key('column_width'):
                 ret['column_width']= opts['default_width']
             # add as inclusion if not a attribute of model
-            if not field in map(lambda x: x.attname, self.model._meta.fields):
+            if self.model and not field in map(lambda x: x.attname, self.model._meta.fields):
                 opts['query']['inclusions'].append(field)
             # add to header
             opts['headers'].append(ret)
