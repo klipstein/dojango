@@ -183,7 +183,7 @@ def json_decode(json_string):
     """
     return json.loads(json_string)
     
-def json_response(data, func_name=None, use_iframe=False):
+def to_json_response(data, func_name=None, use_iframe=False):
     """
     This functions creates a http response object. It mainly set the right
     headers for you.

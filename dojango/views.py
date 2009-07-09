@@ -4,7 +4,7 @@ from django.db import models
 from django.shortcuts import render_to_response
 from django.conf import settings
 
-from dojango.util import json_response, to_dojo_data, json_encode
+from dojango.util import to_dojo_data, json_encode
 from dojango.decorators import json_response
 from dojango.util import to_dojo_data
 from dojango.util.form import get_combobox_data

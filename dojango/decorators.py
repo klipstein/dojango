@@ -1,7 +1,7 @@
 from django.http import HttpResponseServerError
 from django.utils import simplejson as json
 
-from util import json_response as json_resp
+from util import to_json_response
 from util import to_dojo_data
 
 try:
@@ -137,7 +137,7 @@ def __prepare_json_ret(request, ret, callback_param_name=None, use_iframe=False)
     json_ret = ""
     try:
         # Sometimes the serialization fails, i.e. when there are too deeply nested objects or even classes inside
-        json_ret = json_resp(ret, func_name, use_iframe)
+        json_ret = to_json_response(ret, func_name, use_iframe)
     except Exception, e:
         print '\n\n===============Exception=============\n\n'+str(e)+'\n\n' 
         print ret

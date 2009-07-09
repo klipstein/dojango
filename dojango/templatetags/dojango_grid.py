@@ -4,7 +4,7 @@ from django.db import models
 from django.template import TemplateSyntaxError
 from django.template.loader import get_template
 
-from dojango.util import json_response, to_dojo_data, json_encode, extract_nodelist_options
+from dojango.util import extract_nodelist_options
 from dojango.util.dojo_collector import add_module
 from dojango.util.perms import access_model
 from django.core.urlresolvers import reverse, NoReverseMatch
