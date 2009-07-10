@@ -5,11 +5,13 @@ dojo.require("dojo.date.stamp");
 
 dojo.declare("dojango.form.Form", dijit.form.Form, {
 	
-	_getValueAttr: function(){
+	_getDojangoValueAttr: function(){
 		// summary:
-		// 	Overwritten get-value-method of dijit.form.Form: 
-		// 	myForm.attr('value') returns all form field values compatible to the Django backend
-		var values = this.inherited(arguments);
+		// 	Custom get-value-method.
+		// 	myForm.attr('dojangoValue') returns all form field values 
+		// 	in a Django backend compatible format
+		// 	myForm.attr("value") still can be used to retrieve the normal dijit.form.Form result
+		var values = this.attr("value");
 		return dojango.form.converter.convert_values(values);
 	}
 });
