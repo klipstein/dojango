@@ -9,6 +9,14 @@ def activate():
     Activates a global accessible object, where we can save information about
     required dojo modules.
     """
+    class Collector:
+        used_dojo_modules = []
+
+        def add(self, module):
+            # just add a module once!
+            if not module in self.used_dojo_modules:
+                self.used_dojo_modules.append(module)
+
     _active[currentThread()] = Collector()
 
 def deactivate():
@@ -40,11 +48,3 @@ def add_module(module):
     if collector is not None:
         collector.add(module)
     # otherwise do nothing
-
-class Collector:
-    used_dojo_modules = []
-
-    def add(self, module):
-        # just add a module once!
-        if not module in self.used_dojo_modules:
-            self.used_dojo_modules.append(module)
