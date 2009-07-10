@@ -31,7 +31,7 @@ class AJAXSimpleExceptionResponse:
                 response += "%s\n" % tb
             return HttpResponseServerError(response)
 
-class DojoAutoRequireMiddleware:
+class DojoCollector:
     """This middleware enables/disables the global collector object for each 
     request. It is needed, when the dojango.forms integration is used.
     """
@@ -42,7 +42,7 @@ class DojoAutoRequireMiddleware:
         dojo_collector.deactivate()
         return response
     
-class DojoRequireResponse:
+class DojoAutoRequire:
     """
     USE THE MIDDLEWARE ABOVE (IT IS USING A GLOBAL COLLECTOR OBEJCT)!
     
