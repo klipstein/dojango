@@ -83,6 +83,8 @@ class Command(BaseCommand):
                 executable = 'build.bat'
             else:
                 executable = './build.sh'
+                # force executable rights!
+                os.chmod(os.path.join(buildscript_dir, 'build.sh'), 0755)
         # use the passed version for building
         version = options.get('build_version', None)
         if not version:
