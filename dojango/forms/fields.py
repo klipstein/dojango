@@ -51,7 +51,7 @@ class DojoFieldMixin(object):
 ###############################################
 
 class CharField(DojoFieldMixin, fields.CharField):
-    widget = widgets.TextInput
+    widget = widgets.ValidationTextInput
 
 class ChoiceField(DojoFieldMixin, fields.ChoiceField):
     widget = widgets.Select

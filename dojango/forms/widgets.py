@@ -19,7 +19,7 @@ __all__ = (
     'DateInput', 'DateTimeInput', 'TimeInput', 'CheckboxInput', 'Select',
     'NullBooleanSelect', 'SelectMultiple', 'RadioInput', 'RadioFieldRenderer',
     'RadioSelect', 'CheckboxSelectMultiple', 'MultiWidget', 'SplitDateTimeWidget',
-    'SplitHiddenDateTimeWidget', 'EditorInput', 'HorizontalSliderInput',
+    'SplitHiddenDateTimeWidget', 'SimpleTextarea', 'EditorInput', 'HorizontalSliderInput',
     'VerticalSliderInput', 'ValidationTextInput', 'ValidationPasswordInput',
     'EmailTextInput', 'IPAddressTextInput', 'URLTextInput', 'NumberTextInput',
     'RangeBoundTextInput', 'NumberSpinnerInput', 'RatingInput', 'DateInputAnim',
@@ -53,7 +53,7 @@ class DojoWidgetMixin:
         'help_text':'promptMessage',
         'min_value':'constraints.min',
         'max_value':'constraints.max',
-        'max_length':'maxlength',
+        'max_length':'maxLength',
         #'max_digits':'maxDigits',
         'decimal_places':'constraints.places',
         'js_regex':'regExp',
@@ -174,7 +174,11 @@ class FileInput(DojoWidgetMixin, widgets.FileInput):
         }
 
 class Textarea(DojoWidgetMixin, widgets.Textarea):
+    """Auto resizing textarea"""
     dojo_type = 'dijit.form.Textarea'
+    valid_extra_attrs = [
+        'max_length'
+    ]
 
 class DateInput(TextInput):
     """Copy of the implementation in Django 1.1. Before this widget did not exists."""
@@ -278,6 +282,10 @@ DateTimeInput = SplitDateTimeWidget
 #############################################
 # MORE ENHANCED DJANGO/DOJO WIDGETS
 #############################################
+
+class SimpleTextarea(Textarea):
+    """No autoexpanding textarea"""
+    dojo_type = "dijit.form.SimpleTextarea"
 
 class EditorInput(Textarea):
     dojo_type = 'dijit.Editor'
