@@ -96,15 +96,28 @@ class TimeField(DojoFieldMixin, fields.TimeField):
         self.min_value = min_value
         super(TimeField, self).__init__(*args, **kwargs)
 
-class DateTimeField(CharField):
+class SplitDateTimeField(DojoFieldMixin, fields.SplitDateTimeField):
     widget = widgets.DateTimeInput
     
     def __init__(self, min_value=None, max_value=None, *args, **kwargs):
         self.max_value = max_value
         self.min_value = min_value
-        super(DateTimeField, self).__init__(*args, **kwargs)
+        super(SplitDateTimeField, self).__init__(*args, **kwargs)
+        # Overwrite the SplitDateTimeField
+        # copied from original SplitDateTimeField of django
+        errors = self.default_error_messages.copy()
+        if 'error_messages' in kwargs:
+            errors.update(kwargs['error_messages'])
+        fields = (
+            DateField(error_messages={'invalid': errors['invalid_date']}),
+            TimeField(error_messages={'invalid': errors['invalid_time']}),
+        )
+        # copied from original MultiValueField of django
+        for f in fields:
+            f.required = False
+        self.fields = fields
     
-SplitDateTimeField = DateTimeField # datetime input is always splitted
+DateTimeField = SplitDateTimeField # datetime-field is always splitted
     
 class RegexField(DojoFieldMixin, fields.RegexField):
     widget = widgets.ValidationTextInput
