@@ -103,7 +103,7 @@ class Command(BaseCommand):
         if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
             # since version 1.2.0 there is an additional commandline option that does the mini build (solved within js!)
             build_addons = "mini=true"
-        exe_command = 'cd %(buildscript_dir)s && %(executable)s version=%(version)s releaseName="%(version)s" releaseDir=%(release_dir)s %(options)s %(build_addons)s' % \
+        exe_command = 'cd %(buildscript_dir)s && %(executable)s version=%(version)s releaseName="%(version)s" releaseDir="%(release_dir)s" %(options)s %(build_addons)s' % \
                       {'buildscript_dir':buildscript_dir,
                        'executable':executable,
                        'version':version,
