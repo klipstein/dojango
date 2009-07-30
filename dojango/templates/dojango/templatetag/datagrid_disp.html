@@ -32,6 +32,8 @@ dojo.addOnLoad(function(){
         structure:{{id}}_layout, {% if selection_mode %} selectionMode:'{{ selection_mode }}', {% endif %}
         canSort:{{id}}_noSort
         {% if query %},query:{{query|safe}}{% endif %}
+        {% if rowsPerPage %},rowsPerPage:{{rowsPerPage|json}}{% endif %}
+        {% if delayScroll %},delayScroll:{{delayScroll|json}}{% endif %}
    }, dojo.place(dojo.create("div"), dojo.byId("{{id}}_container")));
    dojango._datagrid.{{id}}.startup();
 });
