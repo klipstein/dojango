@@ -33,7 +33,7 @@ dojango.registerModulePath = function(name, absoluteUrl, relativeUrl) {
 	}
 }
 
-dojango.registerModulePath("dojango", dojangoConfig.baseUrl + "/dojango", "../../../dojango");
+// dojango.registerModulePath("dojango", dojangoConfig.baseUrl + "/dojango", "../../../dojango");
 
 // all required dojango functions must be loaded after the module registration
 dojo.require("dojango._base"); // we always include the basic functionality

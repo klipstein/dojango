@@ -53,7 +53,6 @@ class Command(BaseCommand):
             profile_name = args[0]
         profile = self._get_profile(profile_name)
         used_src_version = profile['used_src_version'] % {'DOJO_BUILD_VERSION': settings.DOJO_BUILD_VERSION} # no dependencies to project's settings.py file!
-        profile_file = os.path.basename(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT})
         # used by minify_extreme!
         self.skip_files = profile.get("minify_extreme_skip_files", ())
         self.dojo_base_dir = "%(dojo_root)s/%(version)s" % \
@@ -69,10 +68,6 @@ class Command(BaseCommand):
         stdin, stdout, stderr = os.popen3(settings.DOJO_BUILD_JAVA_EXEC)
         if stderr.read():
             raise CommandError('Please install java. You need it for building dojo.')
-        dest_profile_file = util_base_dir + "/buildscripts/profiles/%(profile_file)s" % \
-                            {'profile_file':profile_file}
-        # copy the profile to the 
-        shutil.copyfile(profile['profile_file'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT}, dest_profile_file)
         buildscript_dir = os.path.abspath('%s/buildscripts' % util_base_dir)
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
             executable = '%(java_exec)s -jar ../shrinksafe/custom_rhino.jar build.js' % \
@@ -108,7 +103,7 @@ class Command(BaseCommand):
                        'executable':executable,
                        'version':version,
                        'release_dir':release_dir,
-                       'options':profile['options'],
+                       'options':profile['options'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},
                        'build_addons':build_addons}
         # print exe_command
         minify = options['minify']
@@ -125,7 +120,6 @@ class Command(BaseCommand):
             self._dojo_mini_extreme()
         if prepare_zipserve:
             self._dojo_prepare_zipserve()
-        os.remove(dest_profile_file) # remove the copied profile file
         
     def _get_profile(self, name):
         default_profile_settings = settings.DOJO_BUILD_PROFILES_DEFAULT

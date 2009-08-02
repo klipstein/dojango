@@ -55,6 +55,7 @@ class Config:
         ret['DOJO_URL'] = self.dojo_url()
         ret['DIJIT_URL'] = self.dijit_url()
         ret['DOJOX_URL'] = self.dojox_url()
+        ret['DOJANGO_URL'] = self.dojango_url()
         ret['DOJO_SRC_FILE'] = self.dojo_src_file()
         ret['DOJANGO_SRC_FILE'] = self.dojango_src_file()
         ret['DEBUG'] = settings.DOJO_DEBUG
@@ -86,7 +87,10 @@ class Config:
         of this app.
         TODO: Listing some advantages!
         '''
-        return "%s/dojango/dojango.js" % settings.BASE_MEDIA_URL
+        return "%s/dojango.js" % self.dojango_url()
+
+    def dojango_url(self):
+        return '%s/%s/dojango' % (settings.BASE_MEDIA_URL, self.version)
 
     def dojo_url(self):
         '''Like the "dojango_dojo_src_file" templatetag, but just returning the base path
@@ -110,9 +114,9 @@ class Config:
         If we use an external build it must be '/' and for a local version, we just have to set the
         path to the dojo path.
         '''
-        base_path = "/"
+        base_path = '%s/%s/dojo/' % (settings.BASE_MEDIA_URL, self.version)
         if self.config.get('is_local', False):
-            base_path = "%s/dojo/" % self.dojo_base_url # last slash is needed
+             base_path = "%s/dojo/" % self.dojo_base_url # last slash is needed
         return base_path
 
     def theme_css_url(self):

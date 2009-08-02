@@ -7,10 +7,10 @@ DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.3.2")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "google")
 
-BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/media')
+BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/dojo-media')
 BUILD_MEDIA_URL = getattr(settings, "DOJANGO_BUILD_MEDIA_URL", '%s/release' % BASE_MEDIA_URL)
-BASE_MEDIA_ROOT = getattr(settings, "DOJANGO_BASE_MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)+'/../media/'))
-BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "/dojo")
+BASE_MEDIA_ROOT = getattr(settings, "DOJANGO_BASE_MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)+'/../dojo-media/'))
+BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "/src")
 # as default the dijit theme folder is used
 DOJO_THEME_URL = getattr(settings, "DOJANGO_DOJO_THEME_URL", False)
 DOJO_THEME = getattr(settings, "DOJANGO_DOJO_THEME", "tundra")
@@ -28,7 +28,7 @@ CDN_USE_SSL = getattr(settings, "DOJANGO_CDN_USE_SSL", False) # is dojo served v
 # - use_gfx: there is a special case, when using dojox.gfx from aol (see http://dev.aol.com/dojo)
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
-_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1',)
+_aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2',)
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
 _google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2',)
 DOJO_PROFILES = {
@@ -38,7 +38,7 @@ DOJO_PROFILES = {
     'aol_uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_aol_versions},
     'aol_gfx': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'versions':_aol_gfx_versions},
     'aol_gfx-uncompressed': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'use_gfx':True, 'uncompressed':True, 'versions':_aol_gfx_versions},
-    'local': {'base_url': '%(BASE_MEDIA_URL)s/dojo', 'is_local':True}, # we don't have a restriction on version names, name them as you like
+    'local': {'base_url': '%(BASE_MEDIA_URL)s', 'is_local':True}, # we don't have a restriction on version names, name them as you like
     'local_release': {'base_url': '%(BUILD_MEDIA_URL)s', 'is_local':True, 'is_local_build':True}, # this will be available after the first dojo build!
     'local_release_uncompressed': {'base_url': '%(BUILD_MEDIA_URL)s', 'uncompressed':True, 'is_local':True, 'is_local_build':True} # same here
 }
@@ -68,13 +68,11 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 #                              this tupel will be appended to the default folders/files that are skipped: see SKIP_FILES in management/commands/dojobuild.py 
 DOJO_BUILD_PROFILES = {
     'dojango': {
-        'profile_file': '%(BASE_MEDIA_ROOT)s/dojango.profile.js',
-        'options': 'profile=dojango action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
+        'options': 'profileFile="%(BASE_MEDIA_ROOT)s/dojango.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
     },
     'dojango_optimized': {
-        'profile_file': '%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js',
-        'options': 'profile=dojango_optimized action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
-        'build_version': '%(DOJO_BUILD_VERSION)sdojango-optimized-with-dojo',
+        'options': 'profileFile="%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
+        'build_version': '%(DOJO_BUILD_VERSION)s-dojango-optimized-with-dojo',
     },
 }
 
@@ -86,7 +84,7 @@ DOJO_BUILD_PROFILES_DEFAULT = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES_DEF
     # use a formatting string, so this can be set in the project's settings.py without getting the dojango settings
     'base_root': '%(BASE_MEDIA_ROOT)s/release',
     'used_src_version': '%(DOJO_BUILD_VERSION)s',
-    'build_version': '%(DOJO_BUILD_VERSION)sdojango-with-dojo',
+    'build_version': '%(DOJO_BUILD_VERSION)s-dojango-with-dojo',
 })
 # TODO: we should also enable the already pre-delivered dojo default profiles
 

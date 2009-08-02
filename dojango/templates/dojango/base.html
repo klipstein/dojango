@@ -36,21 +36,13 @@
 					'parseOnLoad':true,
 					'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
 					{% if not DOJANGO.IS_LOCAL %}
-						,'dojoBlankHtmlUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
-						,'dojoIframeHistoryUrl':"{{ DOJANGO.BASE_MEDIA_URL }}/resources/blank.html"
+						,'dojoBlankHtmlUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
+						,'dojoIframeHistoryUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
 					{% endif %}
 					{% if DOJANGO.CDN_USE_SSL and not DOJANGO.IS_LOCAL %}
 						,'modulePaths':{'dojo': '{{ DOJANGO.DOJO_URL }}', 'dijit': '{{ DOJANGO.DIJIT_URL }}', 'dojox': '{{ DOJANGO.DOJOX_URL }}'}
 					{% endif %}
 				};
-			{% endblock %}
-			
-			{# needed by dojango.registerModulePath (see dojango.js) #}
-			{% block _dojango_dojango_config %}
-			var dojangoConfig = {
-				'baseUrl':"{{ DOJANGO.BASE_MEDIA_URL }}",
-				'isLocalBuild':{{ DOJANGO.IS_LOCAL_BUILD|json }}
-			};
 			{% endblock %}
 		</script>
 	
