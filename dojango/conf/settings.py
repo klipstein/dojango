@@ -7,7 +7,8 @@ DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.3.2")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "google")
 
-BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/dojo-media')
+DOJO_MEDIA_URL = getattr(settings, "DOJANGO_DOJO_MEDIA_URL", 'dojo-media')
+BASE_MEDIA_URL = getattr(settings, "DOJANGO_BASE_MEDIA_URL", '/dojango/%s' % DOJO_MEDIA_URL)
 BUILD_MEDIA_URL = getattr(settings, "DOJANGO_BUILD_MEDIA_URL", '%s/release' % BASE_MEDIA_URL)
 BASE_MEDIA_ROOT = getattr(settings, "DOJANGO_BASE_MEDIA_ROOT", os.path.abspath(os.path.dirname(__file__)+'/../dojo-media/'))
 BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "/src")
@@ -53,12 +54,12 @@ DOJO_PROFILES.update(getattr(settings, "DOJANGO_DOJO_PROFILES", {}))
 # see http://www.sitepen.com/blog/2008/04/02/dojo-mini-optimization-tricks-with-the-dojo-toolkit/ for details
 DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.3.2')
 # this is the default build profile, that is used, when calling "./manage.py dojobuild"
-# "./manage.py dojobuild dojango" would would have the same effect
+# "./manage.py dojobuild dojango" would have the same effect
 DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 # This dictionary defines your build profiles you can use within the custom command "./manage.py dojobuild
 # You can set your own build profile within the main settings.py of the project by defining a dictionary
 # DOJANGO_DOJO_BUILD_PROFILES, that sets the following key/value pairs for each defined profile name:
-#   profile_file: which dojo profile file is used for the build (see dojango.profile.js how it must look like)
+#   profile_file: which dojo profile file is used for the build (see dojango.profile.js how it has to look)
 #   options: these are the options that are passed to the build command (see the dojo doc for details)
 #   OPTIONAL SETTINGS (see DOJO_BUILD_PROFILES_DEFAULT):
 #   base_root: in which directory will the dojo version be builded to? 
@@ -93,4 +94,4 @@ DOJO_BUILD_PROFILES.update(getattr(settings, "DOJANGO_DOJO_BUILD_PROFILES", {}))
 DOJO_BUILD_JAVA_EXEC = getattr(settings, 'DOJANGO_DOJO_BUILD_JAVA_EXEC', 'java')
 # a version string that must have the following form: '1.0.0', '1.2.1', ....
 # this setting is used witin the dojobuild, because the build process changed since version 1.2.0
-DOJO_BUILD_USED_VERSION = getattr(settings, 'DOJANGO_DOJO_BUILD_USED_VERSION', '1.3.2')
+DOJO_BUILD_USED_VERSION = getattr(settings, 'DOJANGO_DOJO_BUILD_USED_VERSION', DOJO_BUILD_VERSION)
