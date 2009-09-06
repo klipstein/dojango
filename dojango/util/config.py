@@ -1,5 +1,6 @@
 from dojango.conf import settings # using the app-specific settings
-import dojo_collector
+from dojango.util import dojo_collector
+from dojango.util import media
 
 class Config:
 
@@ -55,12 +56,14 @@ class Config:
         ret['DOJO_URL'] = self.dojo_url()
         ret['DIJIT_URL'] = self.dijit_url()
         ret['DOJOX_URL'] = self.dojox_url()
-        ret['DOJANGO_URL'] = self.dojango_url()
         ret['DOJO_SRC_FILE'] = self.dojo_src_file()
         ret['DOJANGO_SRC_FILE'] = self.dojango_src_file()
         ret['DEBUG'] = settings.DOJO_DEBUG
         ret['COLLECTOR'] = dojo_collector.get_modules()
         ret['CDN_USE_SSL'] = settings.CDN_USE_SSL
+        # adding all installed dojo-media namespaces
+        ret.update(self.dojo_media_urls())
+        print ret
         return ret
 
     def dojo_src_file(self):
@@ -88,6 +91,15 @@ class Config:
         TODO: Listing some advantages!
         '''
         return "%s/dojango.js" % self.dojango_url()
+
+    def dojo_media_urls(self):
+        '''Getting dict of 'DOJONAMESPACE_URL's for each installed dojo ns in app/dojo-media'''
+        ret = {}
+        for app in media.dojo_media_library:
+            if media.dojo_media_library[app]:
+                for dojo_media in media.dojo_media_library[app]:
+                    ret["%s_URL" % dojo_media[1].upper()] = '%s/%s/%s' % (settings.BASE_MEDIA_URL, self.version, dojo_media[1])
+        return ret
 
     def dojango_url(self):
         return '%s/%s/dojango' % (settings.BASE_MEDIA_URL, self.version)
