@@ -63,7 +63,6 @@ class Config:
         ret['CDN_USE_SSL'] = settings.CDN_USE_SSL
         # adding all installed dojo-media namespaces
         ret.update(self.dojo_media_urls())
-        print ret
         return ret
 
     def dojo_src_file(self):
