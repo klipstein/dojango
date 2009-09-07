@@ -97,7 +97,7 @@ class Config:
         for app in media.dojo_media_library:
             if media.dojo_media_library[app]:
                 for dojo_media in media.dojo_media_library[app]:
-                    ret["%s_URL" % dojo_media[1].upper()] = '%s/%s/%s' % (settings.BASE_MEDIA_URL, self.version, dojo_media[1])
+                    ret["%s_URL" % dojo_media[1].upper()] = '%s/%s' % (self.dojo_base_url, dojo_media[1])
         return ret
 
     def dojango_url(self):
