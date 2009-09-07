@@ -52,7 +52,7 @@ class Config:
         ret['THEME_CSS_URL'] = self.theme_css_url()
         ret['THEME'] = settings.DOJO_THEME
         ret['BASE_MEDIA_URL'] = settings.BASE_MEDIA_URL
-        ret['DOJO_BASE_PATH'] = self.dojo_base_path()
+        ret['DOJO_BASE_PATH'] = '%s/dojo/' % self.dojo_base_path()
         ret['DOJO_URL'] = self.dojo_url()
         ret['DIJIT_URL'] = self.dijit_url()
         ret['DOJOX_URL'] = self.dojox_url()
@@ -97,7 +97,7 @@ class Config:
         for app in media.dojo_media_library:
             if media.dojo_media_library[app]:
                 for dojo_media in media.dojo_media_library[app]:
-                    ret["%s_URL" % dojo_media[1].upper()] = '%s/%s' % (self.dojo_base_url, dojo_media[1])
+                    ret["%s_URL" % dojo_media[1].upper()] = '%s/%s' % (self.dojo_base_path(), dojo_media[1])
         return ret
 
     def dojango_url(self):
@@ -118,16 +118,15 @@ class Config:
         of dojox.'''
         return "%s/dojox" % self.dojo_base_url
 
-    # TODO: we should add the dojoc path, if we can do that
-
     def dojo_base_path(self):
         '''djConfig.baseUrl can be used to mix an external xd-build with some local dojo modules.
         If we use an external build it must be '/' and for a local version, we just have to set the
         path to the dojo path.
+        Use it within djConfig.baseUrl by appending "dojo/". 
         '''
-        base_path = '%s/%s/dojo/' % (settings.BASE_MEDIA_URL, self.version)
+        base_path = '%s/%s' % (settings.BASE_MEDIA_URL, self.version)
         if self.config.get('is_local', False):
-             base_path = "%s/dojo/" % self.dojo_base_url # last slash is needed
+             base_path = self.dojo_base_url
         return base_path
 
     def theme_css_url(self):
