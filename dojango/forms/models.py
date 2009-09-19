@@ -112,7 +112,7 @@ def formfield_function(field):
                     }
                 })
             elif len(field_map) == 3:
-                widget=field_map[2]
+                used_widget=field_map[2]
             if used_widget:
                 return field.formfield(form_class=field_map[1], widget=used_widget)
             return field.formfield(form_class=field_map[1])
