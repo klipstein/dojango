@@ -56,7 +56,7 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
         target = target.order_by(request.GET['sort'])
     
     if request.GET.has_key('search') and request.GET.has_key('search_fields'):
-        ored = [models.Q(**{str(k).strip(): str(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
+        ored = [models.Q(**{str(k).strip(): unicode(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
         target = target.filter(reduce(operator.or_, ored))
     
     # custom options passed from "query" param in datagrid
@@ -72,12 +72,12 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
         if access_model_callback(app_name, model_name, request, data):   
             ret = {}
             for f in data._meta.fields:
-                if access_field_callback(request, app_name, model_name,f.attname, data): 
+                if access_field_callback(request, app_name, model_name, f.attname, data): 
                     ret[f.attname] = getattr(data, f.attname) #json_encode() this?
             fields = dir(data.__class__) + ret.keys()
             add_ons = [k for k in dir(data) if k not in fields and access_field_callback(request, app_name, model_name, k, data)]
             for k in add_ons:
-                    ret[k] = _any(getattr(data, k))
+                ret[k] = getattr(data, k)
             if request.GET.has_key('inclusions'):
                 for k in request.GET['inclusions'].split(','):
                     if k == "": continue
@@ -94,9 +94,9 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
             raise Exception, "You're not allowed to query the model '%s.%s' (add it to the array of the DOJANGO_DATAGRID_ACCESS setting)" % (model_name, app_name)
     return to_dojo_data(complete, identifier=model._meta.pk.name, num_rows=num)
 
-#                                #########
-#                                 # Tests #
-#                                  #########
+###########
+#  Tests  #
+###########
 
 def test(request):
     return render_to_response('dojango/test.html')
