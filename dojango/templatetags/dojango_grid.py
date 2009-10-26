@@ -119,6 +119,13 @@ class DatagridNode(template.Node):
         
         # Config for template
         opts['headers'] = []
+
+        # Get field labels using verbose name (take into account i18n), will be used
+        # for column labels
+        verbose_field_names = {}
+        if self.model:
+            verbose_field_names = dict([(f.name, f.verbose_name) for f in self.model._meta.fields])
+
         for field in opts['list_display']:
             ret = {'attname':field}
             for q in FIELD_ATTRIBUTES:
@@ -126,10 +133,7 @@ class DatagridNode(template.Node):
                      ret[q] = opts[q][field]
             # custom default logic
             if not ret.has_key('label'):
-                try:
-                    ret['label'] = getattr(self.model, field).short_description
-                except AttributeError:
-                    ret['label'] = field.replace('_', ' ') 
+                ret['label'] = verbose_field_names.get(field, field.replace('_', ' '))
             if not ret.has_key('column_width'):
                 ret['column_width']= opts['default_width']
             # add as inclusion if not a attribute of model
