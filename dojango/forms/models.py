@@ -47,8 +47,13 @@ class InlineForeignKeyField(DojoFieldMixin, InlineForeignKeyField, Field):
     def __init__(self, parent_instance, *args, **kwargs):
         self.parent_instance = parent_instance
         self.pk_field = kwargs.pop("pk_field", False)
+        self.to_field = kwargs.pop("to_field", None)
         if self.parent_instance is not None:
-            kwargs["initial"] = self.parent_instance.pk
+            if self.to_field:
+                kwargs["initial"] = getattr(self.parent_instance, self.to_field)
+            else:
+                kwargs["initial"] = self.parent_instance.pk
+
         kwargs["required"] = False
         kwargs["widget"] = InlineForeignKeyHiddenInput
         # don't call the the superclass of this one. Use the superclass of the 
