@@ -14,9 +14,9 @@ from django.utils.functional import Promise
 try:
     # we need it, if we want to serialize query- and model-objects
     # of google appengine within json_encode
-    import google
+    from google import appengine
 except:
-    google = None
+    appengine = None
 
 try:
     # this is just available since django version 1.0
@@ -109,7 +109,7 @@ def json_encode(data):
         if isinstance(data, list):
             ret = _list(data)
         # Same as for lists above.
-        elif google and isinstance(data, google.appengine.ext.db.Query):
+        elif appengine and isinstance(data, appengine.ext.db.Query):
             ret = _list(data)
         elif isinstance(data, dict):
             ret = _dict(data)
@@ -121,7 +121,7 @@ def json_encode(data):
             ret = _list(data)
         elif isinstance(data, Model):
             ret = _model(data)
-        elif google and isinstance(data, google.appengine.ext.db.Model):
+        elif appengine and isinstance(data, appengine.ext.db.Model):
             ret = _googleModel(data)
         # here we need to encode the string as unicode (otherwise we get utf-16 in the json-response)
         elif isinstance(data, basestring):
