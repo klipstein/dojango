@@ -3,6 +3,7 @@ from django.utils.translation import ugettext as _
 from django.forms.formsets import TOTAL_FORM_COUNT
 from django.forms.formsets import INITIAL_FORM_COUNT
 from django.forms.formsets import DELETION_FIELD_NAME
+from django.forms.formsets import ORDERING_FIELD_NAME
 from django.forms.formsets import formset_factory as django_formset_factory
 from django.forms.forms import Form
 
@@ -55,9 +56,11 @@ class BaseFormSet(BaseFormSet):
 
     def add_fields(self, form, index):
         """Using the dojango form fields instead of the django ones"""
+        is_dojo_1_0 = getattr(self, "_total_form_count", False)
         if self.can_order:
             # Only pre-fill the ordering field for initial forms.
-            if index < self._initial_form_count:
+            # before django 1.1 _total_form_count was used!
+            if index < (is_dojo_1_0 and self._total_form_count or self.total_form_count()):
                 form.fields[ORDERING_FIELD_NAME] = IntegerField(label=_(u'Order'), initial=index+1, required=False)
             else:
                 form.fields[ORDERING_FIELD_NAME] = IntegerField(label=_(u'Order'), required=False)
