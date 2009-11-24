@@ -1,0 +1,7 @@
+include LICENSE
+include dojango/README
+include MANIFEST.in
+include dojango/appengine/README
+recursive-include dojango/bin *
+recursive-include dojango/templates *
+recursive-include dojango/dojo-media *
