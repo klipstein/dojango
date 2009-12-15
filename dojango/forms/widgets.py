@@ -23,7 +23,8 @@ __all__ = (
     'VerticalSliderInput', 'ValidationTextInput', 'ValidationPasswordInput',
     'EmailTextInput', 'IPAddressTextInput', 'URLTextInput', 'NumberTextInput',
     'RangeBoundTextInput', 'NumberSpinnerInput', 'RatingInput', 'DateInputAnim',
-    'DropDownSelect', 'CheckedMultiSelect', 'ComboBox',
+    'DropDownSelect', 'CheckedMultiSelect', 'FilteringSelect', 'ComboBox',
+    'ListInput',
 )
 
 dojo_config = Config() # initialize the configuration
@@ -229,14 +230,16 @@ class CheckboxInput(DojoWidgetMixin, widgets.CheckboxInput):
     dojo_type = 'dijit.form.CheckBox'
 
 class Select(DojoWidgetMixin, widgets.Select):
-    dojo_type = 'dijit.form.FilteringSelect'
-    valid_extra_attrs = [
-        'required',
-        'help_text',
-    ]
+    dojo_type = dojo_config.version < '1.4' and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
+    valid_extra_attrs = dojo_config.version < '1.4' and \
+        ['required', 'help_text',] or \
+        ['required',]
 
 class NullBooleanSelect(DojoWidgetMixin, widgets.NullBooleanSelect):
-    dojo_type = 'dijit.form.FilteringSelect'
+    dojo_type = dojo_config.version < '1.4' and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
+    valid_extra_attrs = dojo_config.version < '1.4' and \
+        ['required', 'help_text',] or \
+        ['required',]
 
 class SelectMultiple(DojoWidgetMixin, widgets.SelectMultiple):
     dojo_type = 'dijit.form.MultiSelect'
@@ -438,9 +441,25 @@ class CheckedMultiSelect(SelectMultiple):
             },)
         }
 
+class FilteringSelect(DojoWidgetMixin, widgets.Select):
+    dojo_type = 'dijit.form.FilteringSelect'
+    valid_extra_attrs = [
+        'required', 
+        'help_text',
+    ]
+
 class ComboBox(Select):
     """Nearly the same as FilteringSelect, but ignoring the option value."""
     dojo_type = 'dijit.form.ComboBox'
+
+class ListInput(DojoWidgetMixin, widgets.TextInput):
+    dojo_type = 'dojox.form.ListInput'
+    class Media:
+        css = {
+            'all': ('%(base_url)s/dojox/form/resources/ListInput.css' % {
+                'base_url':dojo_config.dojo_base_url
+            },)
+        }
 
 # THE RANGE SLIDER NEEDS A DIFFERENT REPRESENTATION IN THE FRONTEND
 # SOMETHING LIKE:
