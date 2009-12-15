@@ -448,7 +448,7 @@ class FilteringSelect(DojoWidgetMixin, widgets.Select):
         'help_text',
     ]
 
-class ComboBox(Select):
+class ComboBox(FilteringSelect):
     """Nearly the same as FilteringSelect, but ignoring the option value."""
     dojo_type = 'dijit.form.ComboBox'
 
