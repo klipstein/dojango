@@ -3,6 +3,7 @@ from optparse import make_option
 import os
 import re
 import shutil
+import sys
 from dojango.conf import settings
 
 try:
@@ -61,7 +62,7 @@ class Command(BaseCommand):
         # does the defined dojo-directory exist?
         util_base_dir = "%(dojo_base_dir)s/util" % {'dojo_base_dir':self.dojo_base_dir}
         if not os.path.exists(util_base_dir):
-            raise CommandError('Put the the dojo source files (version \'%(version)s\') in the folder \'%(folder)s/%(version)s\'' % \
+            raise CommandError('Put the the dojo source files (version \'%(version)s\') in the folder \'%(folder)s/%(version)s\' or set a different version in settings.DOJANGO_DOJO_BUILD_VERSION' % \
                                {'version':used_src_version,
                                 'folder':settings.BASE_DOJO_ROOT})
         # check, if java is installed
@@ -111,6 +112,9 @@ class Command(BaseCommand):
         prepare_zipserve = options['prepare_zipserve']
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0' and (minify or minify_extreme):
             self._dojo_mini_before_build()
+        if sys.platform == 'win32': # fixing issue #39, if dojango is installed on a different drive
+            exe_command = os.path.splitdrive(buildscript_dir)[0] + ' && ' + exe_command
+        
         # do the build
         os.system(exe_command)
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
