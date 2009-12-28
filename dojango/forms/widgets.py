@@ -24,7 +24,7 @@ __all__ = (
     'EmailTextInput', 'IPAddressTextInput', 'URLTextInput', 'NumberTextInput',
     'RangeBoundTextInput', 'NumberSpinnerInput', 'RatingInput', 'DateInputAnim',
     'DropDownSelect', 'CheckedMultiSelect', 'FilteringSelect', 'ComboBox',
-    'ListInput',
+    'ComboBoxStore', 'FilteringSelectStore', 'ListInput',
 )
 
 dojo_config = Config() # initialize the configuration
@@ -441,17 +441,65 @@ class CheckedMultiSelect(SelectMultiple):
             },)
         }
 
-class FilteringSelect(DojoWidgetMixin, widgets.Select):
-    dojo_type = 'dijit.form.FilteringSelect'
+class ComboBox(DojoWidgetMixin, widgets.Select):
+    """Nearly the same as FilteringSelect, but ignoring the option value."""
+    dojo_type = 'dijit.form.ComboBox'
     valid_extra_attrs = [
         'required', 
         'help_text',
     ]
 
-class ComboBox(FilteringSelect):
-    """Nearly the same as FilteringSelect, but ignoring the option value."""
-    dojo_type = 'dijit.form.ComboBox'
+class FilteringSelect(ComboBox):
+    dojo_type = 'dijit.form.FilteringSelect'
 
+class ComboBoxStore(TextInput):
+    """A combobox that is receiving data from a given dojo data url.
+    As default dojo.data.ItemFileReadStore is used. You can overwrite
+    that behaviour by passing a different store name 
+    (e.g. dojox.data.QueryReadStore).
+    Usage:
+        ComboBoxStore("/dojo-data-store-url/")
+    """
+    dojo_type = 'dijit.form.ComboBox'
+    valid_extra_attrs = [
+        'required', 
+        'help_text',
+    ]
+    store = 'dojo.data.ItemFileReadStore'
+    store_attrs = {}
+    url = None
+    
+    def __init__(self, url, attrs=None, store=None, store_attrs={}):
+        self.url = url
+        if store:
+            self.store = store
+        if store_attrs:
+            self.store_attrs = store_attrs
+        self.extra_dojo_require.append(self.store)
+        super(ComboBoxStore, self).__init__(attrs)
+    
+    def render(self, name, value, attrs=None):
+        if value is None: value = ''
+        store_id = self.get_store_id(getattr(attrs, "id", None), name)
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name, store=store_id)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_unicode(value)
+        self.store_attrs.update({
+            'dojoType': self.store,
+            'url': self.url,
+            'jsId':store_id
+        })
+        # TODO: convert store attributes to valid js-format (False => false, dict => {}, array = [])
+        store_node = '<div%s></div>' % flatatt(self.store_attrs)
+        return mark_safe(u'%s<input%s />' % (store_node, flatatt(final_attrs)))
+
+    def get_store_id(self, id, name):
+        return "_store_" + (id and id or name)
+
+class FilteringSelectStore(ComboBoxStore):
+    dojo_type = 'dijit.form.FilteringSelect'
+    
 class ListInput(DojoWidgetMixin, widgets.TextInput):
     dojo_type = 'dojox.form.ListInput'
     class Media:
@@ -461,7 +509,7 @@ class ListInput(DojoWidgetMixin, widgets.TextInput):
             },)
         }
 
-# THE RANGE SLIDER NEEDS A DIFFERENT REPRESENTATION IN THE FRONTEND
+# THE RANGE SLIDER NEEDS A DIFFERENT REPRESENTATION WITHIN HTML
 # SOMETHING LIKE:
 # <div dojoType="dojox.form.RangeSlider"><input value="5"/><input value="10"/></div>
 '''class HorizontalRangeSlider(HorizontalSliderInput):
@@ -477,7 +525,6 @@ class ListInput(DojoWidgetMixin, widgets.TextInput):
         }
 '''
 # TODO: implement
-# dijit.form.ComboBox (the more extended case, that is using a store! ForeignKeyField ...)
 # dojox.form.RangeSlider
 # dojox.form.MultiComboBox
 # dojox.form.FileUploader
