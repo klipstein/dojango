@@ -198,7 +198,7 @@ def to_json_response(data, func_name=None, use_iframe=False):
     # don't wrap it into a function, if we use an iframe
     if func_name and not use_iframe:
         data = "%s(%s)" % (func_name, data)
-    mimetype = "text/json"
+    mimetype = "application/json"
     if use_iframe:
         mimetype = "text/html"
         data = render_to_string("dojango/json_iframe.html", {'json_data': data})
