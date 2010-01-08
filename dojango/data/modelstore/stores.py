@@ -39,7 +39,7 @@ class BaseStore(object):
         """
         pass
 
-    def __init__(self, objects=None, stores=None, identifier=None, label=None):
+    def __init__(self, objects=None, stores=None, identifier=None, label=None, is_nested=False):
         """ Store instance constructor.
 
             Arguments (all optional):
@@ -59,6 +59,13 @@ class BaseStore(object):
 
                 label:
                     The 'label' attribute used in the store.
+                
+                is_nested:
+                    This is required, if we want to return the items as direct
+                    array and not as dictionary including 
+                    {'identifier': "id", 'label', ...}
+                    It mainly is required, if children of a tree structure needs
+                    to be rendered (see TreeStore).
         """
 
         # Instantiate the inner Meta class
@@ -78,9 +85,12 @@ class BaseStore(object):
             self.set_option('label', label)
         elif not self.has_option('label'):
             self.set_option('label', 'label')
+        
+        # Is this a nested store? (indicating that it should be rendered as array)
+        self.is_nested = is_nested
 
         # Set the objects
-        if objects:
+        if objects != None:
             self.set_option('objects', objects)
         elif not self.has_option('objects'):
             self.set_option('objects', [])
@@ -107,7 +117,7 @@ class BaseStore(object):
             self.service = None
 
         self.request = None # Placeholder for the Request object (if used)
-        self.data = {} # The serialized data in it's final form
+        self.data = self.is_nested and [] or {} # The serialized data in it's final form
 
     def has_option(self, option):
         """ True/False whether the given option is set in the store
@@ -145,7 +155,8 @@ class BaseStore(object):
 
         if self.service:
             self._merge_servicemethods()
-            self.data['SMD'] = self.service.get_smd( request.get_full_path() )
+            if not self.is_nested:
+                self.data['SMD'] = self.service.get_smd( request.get_full_path() )
 
             if request.method == 'POST':
                 return self.service(request)
@@ -280,13 +291,17 @@ class BaseStore(object):
     def _start_serialization(self):
         """ Called when serialization of the store begins
         """
-        self.data['identifier'] = self.get_option('identifier')
+        if not self.is_nested:
+            self.data['identifier'] = self.get_option('identifier')
 
         # Don't set a label field in the store if it's not wanted
-        if bool( self.get_option('label') ):
+        if bool( self.get_option('label') ) and not self.is_nested:
             self.data['label'] = self.get_option('label')
 
-        self.data['items'] = []
+        if self.is_nested:
+            self.data = []
+        else:
+            self.data['items'] = []
 
     def _start_object(self, obj):
         """ Called when starting to serialize each object in 'objects'
@@ -324,7 +339,10 @@ class BaseStore(object):
     def _end_object(self, obj):
         """ Called when serializing an object ends.
         """
-        self.data['items'].append(self._item)
+        if self.is_nested:
+            self.data.append(self._item)
+        else:
+            self.data['items'].append(self._item)
         self._item = None
 
     def _end_serialization(self):
