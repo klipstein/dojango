@@ -43,7 +43,6 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
     The default callbacks will allow access to any model in added to the DOJANGO_DATAGRID_ACCESS
     in settings.py and any function/field that is not "delete"
     """
-    
     # get the model
     model = get_model(app_name,model_name)
     
@@ -72,10 +71,10 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
         if access_model_callback(app_name, model_name, request, data):   
             ret = {}
             for f in data._meta.fields:
-                if access_field_callback(request, app_name, model_name, f.attname, data): 
+                if access_field_callback(app_name, model_name, f.attname, request, data): 
                     ret[f.attname] = getattr(data, f.attname) #json_encode() this?
             fields = dir(data.__class__) + ret.keys()
-            add_ons = [k for k in dir(data) if k not in fields and access_field_callback(request, app_name, model_name, k, data)]
+            add_ons = [k for k in dir(data) if k not in fields and access_field_callback(app_name, model_name, k, request, data)]
             for k in add_ons:
                 ret[k] = getattr(data, k)
             if request.GET.has_key('inclusions'):

@@ -21,4 +21,6 @@ def access_model_field(app_name, model_name, field_name, request=None, instance=
     Return true to allow access of a given field_name to model app_name.model_name given
     a specific object of said model.
     """
-    return not field_name in ('delete',)
+    # in django version 1.2 a new attribute is on all models: _state of type ModelState
+    # that field shouldn't be accessible
+    return not field_name in ('delete', '_state',)
