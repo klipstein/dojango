@@ -93,7 +93,7 @@ MODEL_TO_FORM_FIELD_MAP = (
     (fields.CharField, CharField),
 )
 
-def formfield_function(field):
+def formfield_function(field, **kwargs):
     """
     Custom formfield function, so we can inject our own form fields. The 
     mapping of model fields to form fields is defined in 'MODEL_TO_FORM_FIELD_MAP'.
@@ -116,13 +116,15 @@ def formfield_function(field):
                         'help_text':field.help_text,
                     }
                 })
+            elif kwargs.has_key('widget'):
+                used_widget=kwargs['widget']
             elif len(field_map) == 3:
                 used_widget=field_map[2]
             if used_widget:
                 return field.formfield(form_class=field_map[1], widget=used_widget)
             return field.formfield(form_class=field_map[1])
     # return the default formfield, if there is no equivalent
-    return field.formfield()
+    return field.formfield(**kwargs)
 
 # ModelForms #################################################################
 
