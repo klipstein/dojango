@@ -250,10 +250,10 @@ RadioFieldRenderer = widgets.RadioFieldRenderer
 class RadioSelect(DojoWidgetMixin, widgets.RadioSelect):
     dojo_type = 'dijit.form.RadioButton'
 
-    def __init__(self, attrs=None):
+    def __init__(self, attrs=None, choices=()):
         if dojo_config.version < '1.3':
             self.alt_require = 'dijit.form.CheckBox'
-        super(RadioSelect, self).__init__(attrs)
+        super(RadioSelect, self).__init__(attrs, choices)
 
 class CheckboxSelectMultiple(DojoWidgetMixin, widgets.CheckboxSelectMultiple):
     dojo_type = 'dijit.form.CheckBox'
