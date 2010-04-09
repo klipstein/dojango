@@ -5,6 +5,7 @@ from decimal import Decimal
 from dojango.conf import settings # using the app-specific settings
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.db.models import Model
+from django.db.models import ImageField, FileField
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -138,6 +139,7 @@ def json_encode(data):
         elif isinstance(data, datetime.time):
             ret = "T" + str(data)
         else:
+            # always fallback to a string!
             ret = data
         return ret
     
@@ -145,10 +147,15 @@ def json_encode(data):
         ret = {}
         # If we only have a model, we only want to encode the fields.
         for f in data._meta.fields:
-            ret[f.attname] = _any(getattr(data, f.attname))
+            # special FileField handling (they can't be json serialized)
+            if isinstance(f, ImageField) or isinstance(f, FileField):
+                ret[f.attname] = unicode(getattr(data, f.attname))
+            else:
+                ret[f.attname] = _any(getattr(data, f.attname))
         # And additionally encode arbitrary properties that had been added.
         fields = dir(data.__class__) + ret.keys()
-        add_ons = [k for k in dir(data) if k not in fields]
+        # ignoring _state and delete properties
+        add_ons = [k for k in dir(data) if k not in fields and k not in ('delete', '_state',)]
         for k in add_ons:
             ret[k] = _any(getattr(data, k))
         return ret

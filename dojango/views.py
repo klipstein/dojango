@@ -43,6 +43,7 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
     The default callbacks will allow access to any model in added to the DOJANGO_DATAGRID_ACCESS
     in settings.py and any function/field that is not "delete"
     """
+    
     # get the model
     model = get_model(app_name,model_name)
     
@@ -50,29 +51,41 @@ def datagrid_list(request, app_name, model_name, access_model_callback=access_mo
     target = model.objects.all()
     
     # modify query set based on the GET params, dont do the start/count splice
-    # until after all clauses added
-    if request.GET.has_key('sort'):
-        target = target.order_by(request.GET['sort'])
-    
-    if request.GET.has_key('search') and request.GET.has_key('search_fields'):
-        ored = [models.Q(**{str(k).strip(): unicode(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
-        target = target.filter(reduce(operator.or_, ored))
-    
     # custom options passed from "query" param in datagrid
     for key in [ d for d in request.GET.keys() if not d in AVAILABLE_OPTS]:
         target = target.filter(**{str(key):request.GET[key]})
     num = target.count()
-    # get only the limit number of models with a given offset
-    target=target[request.GET['start']:int(request.GET['start'])+int(request.GET['count'])]
+
+    # until after all clauses added
+    if request.GET.has_key('search') and request.GET.has_key('search_fields'):
+        ored = [models.Q(**{str(k).strip(): unicode(request.GET['search'])} ) for k in request.GET['search_fields'].split(",")]
+        target = target.filter(reduce(operator.or_, ored))
+
+    if request.GET.has_key('sort') and request.GET["sort"] not in request.GET["inclusions"] and request.GET["sort"][1:] not in request.GET["inclusions"]:
+		# if the sort field is in inclusions, it must be a function call.. 
+        target = target.order_by(request.GET['sort'])
+    else:
+		if request.GET.has_key('sort') and request.GET["sort"].startswith('-'):
+			target = sorted(target, lambda x,y: cmp(getattr(x,request.GET["sort"][1:])(),getattr(y,request.GET["sort"][1:])()));
+			target.reverse();
+		elif request.GET.has_key('sort'):
+			target =  sorted(target, lambda x,y: cmp(getattr(x,request.GET["sort"])(),getattr(y,request.GET["sort"])()));
     
+    
+    # get only the limit number of models with a given offset
+    target=target[int(request.GET['start']):int(request.GET['start'])+int(request.GET['count'])]
     # create a list of dict objects out of models for json conversion
     complete = []
-    for data in target:   
+    for data in target:
+        # TODO: complete rewrite to use dojangos already existing serializer (or the dojango ModelStore)
         if access_model_callback(app_name, model_name, request, data):   
             ret = {}
             for f in data._meta.fields:
-                if access_field_callback(app_name, model_name, f.attname, request, data): 
-                    ret[f.attname] = getattr(data, f.attname) #json_encode() this?
+                if access_field_callback(app_name, model_name, f.attname, request, data):
+                    if isinstance(f, models.ImageField) or isinstance(f, models.FileField): # filefields can't be json serialized
+                        ret[f.attname] = unicode(getattr(data, f.attname))
+                    else:
+                        ret[f.attname] = getattr(data, f.attname) #json_encode() this?
             fields = dir(data.__class__) + ret.keys()
             add_ons = [k for k in dir(data) if k not in fields and access_field_callback(app_name, model_name, k, request, data)]
             for k in add_ons:
