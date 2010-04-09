@@ -60,6 +60,7 @@ class DatagridNode(template.Node):
     label:             dict of attribute:label for header. (other ways exist of setting these)
     query:             way to specify conditions for the table. i.e. to only display elements whose id>10: query={ 'id__gt':10 }
     search:            list or tuple of fields to query against when searching
+    show_search:       Display search field (default: True). If False, you'll create your custom search field and call do_{{id}}_search 
     nosort:            fields not to sort on
     formatter:         dict of attribute:js formatter function
     json_store_url:    URL for the ReadQueryStore 
@@ -150,7 +151,11 @@ class DatagridNode(template.Node):
         opts["model_name"] = self.model_name
         opts["app_name"] = self.app_name
         opts['query']['inclusions'] = ",".join(opts['query']['inclusions'])
-        if opts.has_key('search'):  opts['search_fields'] = ",".join(opts['search'])
-        
+        if opts.has_key('search'):
+            opts['search_fields'] = ",".join(opts['search'])
+            opts['show_search'] = opts.get('show_search', True)
+        else:
+            opts['show_search'] = False
+
         # return rendered template
         return get_template("dojango/templatetag/datagrid_disp.html").render(template.Context(opts))

@@ -53,5 +53,5 @@ function do_{{id}}_search(el) {
 }
 {% endif %}
 </script>
-{% if search_fields %}<div style="width:{{width}};height:20px" >&nbsp;Search:<input style="border:solid 1px #ccc;margin-left:10px" type=text onkeyup="do_{{id}}_search(this)"/></div>{% endif %}
+{% if show_search %}<div style="width:{{width}};height:20px" >&nbsp;Search:<input style="border:solid 1px #ccc;margin-left:10px" type=text onkeyup="do_{{id}}_search(this)"/></div>{% endif %}
 <div id="{{id}}_container" style="width:{{width}}; height:{{height}}"></div>
