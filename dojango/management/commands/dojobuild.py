@@ -3,6 +3,7 @@ from optparse import make_option
 import os
 import re
 import shutil
+import subprocess # since python 2.4
 import sys
 from dojango.conf import settings
 
@@ -66,8 +67,10 @@ class Command(BaseCommand):
                                {'version':used_src_version,
                                 'folder':settings.BASE_DOJO_ROOT})
         # check, if java is installed
-        stdin, stdout, stderr = os.popen3(settings.DOJO_BUILD_JAVA_EXEC)
-        if stderr.read():
+        try:
+            # ignoring output of the java call
+            subprocess.call(settings.DOJO_BUILD_JAVA_EXEC, stdout=subprocess.PIPE) # will work with python >= 2.4
+        except:
             raise CommandError('Please install java. You need it for building dojo.')
         buildscript_dir = os.path.abspath('%s/buildscripts' % util_base_dir)
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
