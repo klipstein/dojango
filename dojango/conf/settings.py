@@ -4,7 +4,7 @@ from django.conf import settings
 DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
 
-DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.4.3")
+DOJO_VERSION = getattr(settings, "DOJANGO_DOJO_VERSION", "1.5.0")
 DOJO_PROFILE = getattr(settings, "DOJANGO_DOJO_PROFILE", "google")
 
 DOJO_MEDIA_URL = getattr(settings, "DOJANGO_DOJO_MEDIA_URL", 'dojo-media')
@@ -14,7 +14,7 @@ BASE_MEDIA_ROOT = getattr(settings, "DOJANGO_BASE_MEDIA_ROOT", os.path.abspath(o
 BASE_DOJO_ROOT = getattr(settings, "DOJANGO_BASE_DOJO_ROOT", BASE_MEDIA_ROOT + "/src")
 # as default the dijit theme folder is used
 DOJO_THEME_URL = getattr(settings, "DOJANGO_DOJO_THEME_URL", False)
-DOJO_THEME = getattr(settings, "DOJANGO_DOJO_THEME", "tundra")
+DOJO_THEME = getattr(settings, "DOJANGO_DOJO_THEME", "claro")
 DOJO_DEBUG = getattr(settings, "DOJANGO_DOJO_DEBUG", DEBUG) # using the default django DEBUG setting
 DOJO_SECURE_JSON = getattr(settings, "DOJANGO_DOJO_SECURE_JSON", True) # if you are using dojo version < 1.2.0 you have set it to False
 CDN_USE_SSL = getattr(settings, "DOJANGO_CDN_USE_SSL", False) # is dojo served via https from google? doesn't work for aol!
@@ -31,7 +31,7 @@ CDN_USE_SSL = getattr(settings, "DOJANGO_CDN_USE_SSL", False) # is dojo served v
 # - is_local_build: profile being a locally builded version
 _aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2', '1.4', '1.4.0', '1.4.1', '1.4.3',)
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
-_google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2', '1.4', '1.4.0', '1.4.1', '1.4.3',)
+_google_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2', '1.4', '1.4.0', '1.4.1', '1.4.3', '1.5', '1.5.0',)
 DOJO_PROFILES = {
     'google': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_versions}, # google just supports version >= 1.1.1
     'google_uncompressed': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_versions},
@@ -52,7 +52,7 @@ DOJO_PROFILES.update(getattr(settings, "DOJANGO_DOJO_PROFILES", {}))
 # =============================================================================================
 # general doc: http://dojotoolkit.org/book/dojo-book-0-9/part-4-meta-dojo/package-system-and-custom-builds
 # see http://www.sitepen.com/blog/2008/04/02/dojo-mini-optimization-tricks-with-the-dojo-toolkit/ for details
-DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.4.3')
+DOJO_BUILD_VERSION = getattr(settings, "DOJANGO_DOJO_BUILD_VERSION", '1.5.0')
 # this is the default build profile, that is used, when calling "./manage.py dojobuild"
 # "./manage.py dojobuild dojango" would have the same effect
 DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
