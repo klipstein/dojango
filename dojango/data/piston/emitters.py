@@ -59,5 +59,5 @@ class DojoDataEmitter(Emitter):
 
 
 def register_emitters():
-    Emitter.register('dojson', DojoDataEmitter,
+    Emitter.register('dojo-data', DojoDataEmitter,
         'application/json; charset=utf-8')
