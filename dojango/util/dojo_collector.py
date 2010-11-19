@@ -48,3 +48,5 @@ def add_module(module):
     if collector is not None:
         collector.add(module)
     # otherwise do nothing
+    pass
+
