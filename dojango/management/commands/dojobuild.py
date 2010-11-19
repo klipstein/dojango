@@ -93,10 +93,11 @@ class Command(BaseCommand):
         self.dojo_release_dir = '%(base_path)s/%(version)s' % {
                           'base_path':profile['base_root'] % {'BASE_MEDIA_ROOT':settings.BASE_MEDIA_ROOT},
                           'version':version} # we don't want to have a dependancy to the project's settings file!
+        release_dir = os.path.abspath(os.path.join(self.dojo_release_dir, "../"))
         # the build command handling is so different between the versions!
         # sometimes we need to add /, sometimes not :-(
-        # if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
-        release_dir = os.path.abspath(os.path.join(self.dojo_release_dir, "../")) + os.path.sep
+        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+            release_dir = release_dir + os.path.sep
         # setting up the build command
         build_addons = ""
         if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
