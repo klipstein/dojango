@@ -291,7 +291,9 @@ class ValueMethod(BaseMethod):
         val = utils.resolve_dotted_attribute(obj, self.field.model_field_name)
 
         # Prevent throwing a MethodException if the value is None
-        return (val is None) and None or self.get_method(val)(*self.args, **self.kwargs)
+        if val is None:
+            return None
+        return self.get_method(val)(*self.args, **self.kwargs)
 
 ###
 # Pre-built custom Methods
