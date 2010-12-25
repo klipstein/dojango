@@ -152,7 +152,7 @@ class ModelForm(models.ModelForm):
 def modelform_factory(*args, **kwargs):
     """Changed modelform_factory function, where we use our own formfield_callback"""
     kwargs["formfield_callback"] = formfield_function
-    kwargs["formset"] = BaseModelForm
+    kwargs["form"] = ModelForm
     return models.modelform_factory(*args, **kwargs)
 
 # ModelFormSets ##############################################################
