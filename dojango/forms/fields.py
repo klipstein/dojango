@@ -1,4 +1,6 @@
 from django.forms import *
+from django.conf import settings as dj_settings
+from django.utils import formats
 
 from dojango.forms import widgets
 from dojango.util import json_encode
@@ -72,26 +74,28 @@ class FileField(DojoFieldMixin, fields.FileField):
 class ImageField(DojoFieldMixin, fields.ImageField):
     widget = widgets.FileInput
 
-DEFAULT_DATE_INPUT_FORMATS = tuple(list(fields.DEFAULT_DATE_INPUT_FORMATS) + [
+# also support dojo's default date-string
+dj_settings.DATE_INPUT_FORMATS = tuple(list(dj_settings.DATE_INPUT_FORMATS) + [
     '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S'
 ])
 class DateField(DojoFieldMixin, fields.DateField):
     widget = widgets.DateInput
     
     def __init__(self, input_formats=None, min_value=None, max_value=None, *args, **kwargs):
-        kwargs['input_formats'] = input_formats or DEFAULT_DATE_INPUT_FORMATS
+        kwargs['input_formats'] = input_formats or formats.get_format('DATE_INPUT_FORMATS')
         self.max_value = max_value
         self.min_value = min_value
         super(DateField, self).__init__(*args, **kwargs)
 
-DEFAULT_TIME_INPUT_FORMATS = tuple(list(fields.DEFAULT_TIME_INPUT_FORMATS) + [
+# also support dojo's default date-string
+dj_settings.TIME_INPUT_FORMATS = tuple(list(dj_settings.TIME_INPUT_FORMATS) + [
     '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', 'T%H:%M:%S', 'T%H:%M'
 ])
 class TimeField(DojoFieldMixin, fields.TimeField):
     widget = widgets.TimeInput
     
     def __init__(self, input_formats=None, min_value=None, max_value=None, *args, **kwargs):
-        kwargs['input_formats'] = input_formats or DEFAULT_TIME_INPUT_FORMATS
+        kwargs['input_formats'] = input_formats or formats.get_format('TIME_INPUT_FORMATS')
         self.max_value = max_value
         self.min_value = min_value
         super(TimeField, self).__init__(*args, **kwargs)
