@@ -162,21 +162,28 @@ class BaseModelFormSet(BaseModelFormSet, BaseFormSet):
     def add_fields(self, form, index):
         """Overwritten BaseModelFormSet using the dojango BaseFormSet and
         the ModelChoiceField. 
-        NOTE: This method was copied from django 1.1"""
+        NOTE: This method was copied from django 1.3 beta 1"""
         from django.db.models import AutoField, OneToOneField, ForeignKey
         self._pk_field = pk = self.model._meta.pk
         def pk_is_not_editable(pk):
             return ((not pk.editable) or (pk.auto_created or isinstance(pk, AutoField))
                 or (pk.rel and pk.rel.parent_link and pk_is_not_editable(pk.rel.to._meta.pk)))
         if pk_is_not_editable(pk) or pk.name not in form.fields:
-            try:
-                pk_value = self.get_queryset()[index].pk
-            except IndexError:
-                pk_value = None
+            if form.is_bound:
+                pk_value = form.instance.pk
+            else:
+                try:
+                    if index is not None:
+                        pk_value = self.get_queryset()[index].pk
+                    else:
+                        pk_value = None
+                except IndexError:
+                    pk_value = None
             if isinstance(pk, OneToOneField) or isinstance(pk, ForeignKey):
                 qs = pk.rel.to._default_manager.get_query_set()
             else:
                 qs = self.model._default_manager.get_query_set()
+            qs = qs.using(form.instance._state.db)
             form.fields[self._pk_field.name] = ModelChoiceField(qs, initial=pk_value, required=False, widget=HiddenInput)
         BaseFormSet.add_fields(self, form, index)
 
