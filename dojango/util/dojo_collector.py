@@ -1,8 +1,8 @@
-from django.utils.thread_support import currentThread
+from threading import local
 
 __all__ = ['activate', 'deactivate', 'get_collector', 'add_module']
 
-_active = {}
+_active = local()
 
 def activate():
     """
@@ -17,19 +17,18 @@ def activate():
             if not module in self.used_dojo_modules:
                 self.used_dojo_modules.append(module)
 
-    _active[currentThread()] = Collector()
+    _active.value = Collector()
 
 def deactivate():
     """
     Resets the currently active global object
     """
-    global _active
-    if currentThread() in _active:
-        del _active[currentThread()]
+    if hasattr(_active, "value"):
+        del _active.value
 
 def get_collector():
     """Returns the currently active collector object."""
-    t = _active.get(currentThread(), None)
+    t = getattr(_active, "value", None)
     if t is not None:
         try:
             return t
