@@ -1,4 +1,4 @@
-from django.http import HttpResponseServerError
+from django.http import HttpResponseNotAllowed, HttpResponseServerError
 from django.utils import simplejson as json
 
 from util import to_json_response
@@ -20,7 +20,7 @@ def expect_post_request(func):
         ret = func(*args, **kwargs)
         request = args[0]
         if not request.method=='POST':
-            raise Exception('POST request expected.')
+            return HttpResponseNotAllowed(['POST'])
         return ret
     return _ret
 
