@@ -104,25 +104,22 @@ def formfield_function(field, **kwargs):
     """
     for field_map in MODEL_TO_FORM_FIELD_MAP:
         if isinstance(field, field_map[0]):
-            used_widget = None
+            defaults = {}
             if field.choices:
                 # the normal django field forms.TypedChoiceField is wired hard
                 # within the original db/models/fields.py.
                 # If we use our custom Select widget, we also have to pass in
                 # some additional validation field attributes.
-                used_widget = Select(attrs={
+                defaults['widget'] = Select(attrs={
                     'extra_field_attrs':{
                         'required':not field.blank,
                         'help_text':field.help_text,
                     }
                 })
-            elif kwargs.has_key('widget'):
-                used_widget=kwargs['widget']
             elif len(field_map) == 3:
-                used_widget=field_map[2]
-            if used_widget:
-                return field.formfield(form_class=field_map[1], widget=used_widget)
-            return field.formfield(form_class=field_map[1])
+                defaults['widget']=field_map[2]
+            defaults.update(kwargs)
+            return field.formfield(form_class=field_map[1], **defaults)
     # return the default formfield, if there is no equivalent
     return field.formfield(**kwargs)
 
