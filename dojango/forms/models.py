@@ -87,7 +87,6 @@ MODEL_TO_FORM_FIELD_MAP = (
     (fields.IntegerField, IntegerField),
     (fields.TimeField, TimeField),
     (fields.URLField, URLField),
-    (fields.XMLField, CharField, Textarea),
     (fields.TextField, CharField, Textarea),
     (fields.CharField, CharField),
 )
