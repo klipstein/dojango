@@ -15,8 +15,7 @@ from dojango.forms.widgets import DojoWidgetMixin, Textarea, Select, SelectMulti
 
 __all__ = (
     'ModelForm', 'BaseModelForm', 'model_to_dict', 'fields_for_model',
-    'save_instance', 'form_for_fields', 'ModelChoiceField',
-    'ModelMultipleChoiceField',
+    'save_instance', 'ModelChoiceField', 'ModelMultipleChoiceField',
 )
     
 class ModelChoiceField(DojoFieldMixin, models.ModelChoiceField):
