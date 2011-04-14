@@ -1,6 +1,7 @@
 import datetime
 
 from django.forms import *
+from django.utils import formats
 from django.utils.encoding import StrAndUnicode, force_unicode
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
@@ -181,50 +182,84 @@ class Textarea(DojoWidgetMixin, widgets.Textarea):
         'max_length'
     ]
 
-class DateInput(TextInput):
-    """Copy of the implementation in Django 1.1. Before this widget did not exists."""
-    dojo_type = 'dijit.form.DateTextBox'
-    valid_extra_attrs = [
-        'required',
-        'help_text',
-        'min_value',
-        'max_value',
-    ]
-    format = '%Y-%m-%d'     # '2006-10-25'
-    def __init__(self, attrs=None, format=None):
-        super(DateInput, self).__init__(attrs)
-        if format:
-            self.format = format
+if DateInput:
+    class DateInput(DojoWidgetMixin, widgets.DateInput):
+        dojo_type = 'dijit.form.DateTextBox'
+        valid_extra_attrs = [
+            'required',
+            'help_text',
+            'min_value',
+            'max_value',
+        ]
+else:  # fallback for older django versions
+    class DateInput(TextInput):
+        """Copy of the implementation in Django 1.1. Before this widget did not exists."""
+        dojo_type = 'dijit.form.DateTextBox'
+        valid_extra_attrs = [
+            'required',
+            'help_text',
+            'min_value',
+            'max_value',
+        ]
+        format = '%Y-%m-%d'     # '2006-10-25'
+        def __init__(self, attrs=None, format=None):
+            super(DateInput, self).__init__(attrs)
+            if format:
+                self.format = format
 
-    def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-        elif hasattr(value, 'strftime'):
-            value = datetime_safe.new_date(value)
-            value = value.strftime(self.format)
-        return super(DateInput, self).render(name, value, attrs)
+        def render(self, name, value, attrs=None):
+            if value is None:
+                value = ''
+            elif hasattr(value, 'strftime'):
+                value = datetime_safe.new_date(value)
+                value = value.strftime(self.format)
+            return super(DateInput, self).render(name, value, attrs)
 
-class TimeInput(TextInput):
-    """Copy of the implementation in Django 1.1. Before this widget did not exists."""
-    dojo_type = 'dijit.form.TimeTextBox'
-    valid_extra_attrs = [
-        'required',
-        'help_text',
-        'min_value',
-        'max_value',
-    ]
-    format = "T%H:%M:%S"    # special for dojo: 'T12:12:33'
-    def __init__(self, attrs=None, format=None):
-        super(TimeInput, self).__init__(attrs)
-        if format:
-            self.format = format
+if TimeInput:
+    class TimeInput(DojoWidgetMixin, widgets.TimeInput):
+        dojo_type = 'dijit.form.TimeTextBox'
+        valid_extra_attrs = [
+            'required',
+            'help_text',
+            'min_value',
+            'max_value',
+        ]
+        format = "T%H:%M:%S" # special for dojo: 'T12:12:33'
+        
+        def __init__(self, attrs=None, format=None):
+            # always passing the dojo time format
+            super(TimeInput, self).__init__(attrs, format=self.format)
+        
+        def _has_changed(self, initial, data):
+            try:
+                input_format = self.format
+                initial = datetime.time(*time.strptime(initial, input_format)[3:6])
+            except (TypeError, ValueError):
+                pass
+            return super(TimeInput, self)._has_changed(self._format_value(initial), data)
 
-    def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-        elif hasattr(value, 'strftime'):
-            value = value.strftime(self.format)
-        return super(TimeInput, self).render(name, value, attrs)
+else: # fallback for older django versions
+    class TimeInput(TextInput):
+        """Copy of the implementation in Django 1.1. Before this widget did not exists."""
+        dojo_type = 'dijit.form.TimeTextBox'
+        valid_extra_attrs = [
+            'required',
+            'help_text',
+            'min_value',
+            'max_value',
+        ]
+        format = "T%H:%M:%S"    # special for dojo: 'T12:12:33'
+        def __init__(self, attrs=None, format=None):
+            super(TimeInput, self).__init__(attrs)
+            if format:
+                self.format = format
+
+        def render(self, name, value, attrs=None):
+            if value is None:
+                value = ''
+            elif hasattr(value, 'strftime'):
+                value = value.strftime(self.format)
+            return super(TimeInput, self).render(name, value, attrs)
 
 class CheckboxInput(DojoWidgetMixin, widgets.CheckboxInput):
     dojo_type = 'dijit.form.CheckBox'
@@ -484,7 +519,7 @@ class ComboBoxStore(TextInput):
         final_attrs = self.build_attrs(attrs, type=self.input_type, name=name, store=store_id)
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_unicode(value)
+            final_attrs['value'] = force_unicode(self._format_value(value))
         self.store_attrs.update({
             'dojoType': self.store,
             'url': self.url,

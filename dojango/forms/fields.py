@@ -74,28 +74,26 @@ class FileField(DojoFieldMixin, fields.FileField):
 class ImageField(DojoFieldMixin, fields.ImageField):
     widget = widgets.FileInput
 
-# also support dojo's default date-string
-dj_settings.DATE_INPUT_FORMATS = tuple(list(dj_settings.DATE_INPUT_FORMATS) + [
-    '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S'
-])
 class DateField(DojoFieldMixin, fields.DateField):
     widget = widgets.DateInput
     
     def __init__(self, input_formats=None, min_value=None, max_value=None, *args, **kwargs):
-        kwargs['input_formats'] = input_formats or formats.get_format('DATE_INPUT_FORMATS')
+        kwargs['input_formats'] = input_formats or \
+            tuple(list(formats.get_format('DATE_INPUT_FORMATS')) + [
+                '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S' # also support dojo's default date-strings
+            ])
         self.max_value = max_value
         self.min_value = min_value
         super(DateField, self).__init__(*args, **kwargs)
 
-# also support dojo's default date-string
-dj_settings.TIME_INPUT_FORMATS = tuple(list(dj_settings.TIME_INPUT_FORMATS) + [
-    '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', 'T%H:%M:%S', 'T%H:%M'
-])
 class TimeField(DojoFieldMixin, fields.TimeField):
     widget = widgets.TimeInput
     
     def __init__(self, input_formats=None, min_value=None, max_value=None, *args, **kwargs):
-        kwargs['input_formats'] = input_formats or formats.get_format('TIME_INPUT_FORMATS')
+        kwargs['input_formats'] = input_formats or \
+            tuple(list(formats.get_format('TIME_INPUT_FORMATS')) + [
+                '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', 'T%H:%M:%S', 'T%H:%M' # also support dojo's default time-strings
+            ])
         self.max_value = max_value
         self.min_value = min_value
         super(TimeField, self).__init__(*args, **kwargs)
