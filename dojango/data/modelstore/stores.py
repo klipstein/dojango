@@ -433,8 +433,10 @@ class ModelQueryStore(Store):
 
         # We don't want the client to be able to ask for a million records.
         # They can ask for less, but not more ...
-        if count == 'Infinity' or count > objects_per_query:
+        if count == 'Infinity' or int(count) > objects_per_query:
             count = objects_per_query
+        else:
+            count = int(count)
 
         objects = self.filter_objects(request, self.get_option('objects'), query_dict)
         objects = self.sort_objects(request, objects, sort_attr, descending)
