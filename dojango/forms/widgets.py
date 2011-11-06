@@ -56,7 +56,7 @@ class DojoWidgetMixin:
         'min_value':'constraints.min',
         'max_value':'constraints.max',
         'max_length':'maxLength',
-        #'max_digits':'maxDigits',
+        'max_digits':'maxLength',
         'decimal_places':'constraints.places',
         'js_regex':'regExp',
         'multiple':'multiple',
@@ -419,6 +419,7 @@ class NumberTextInput(TextInput):
         'required',
         'help_text',
         'decimal_places',
+        'max_digits',
     ]
 
 class RangeBoundTextInput(NumberTextInput):
