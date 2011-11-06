@@ -2,6 +2,7 @@ import re
 
 from django.conf import settings
 from django.http import HttpResponseServerError
+from django.utils.encoding import smart_unicode
 
 from dojango.util import dojo_collector
 
@@ -59,13 +60,14 @@ class DojoAutoRequire:
            len(response.content) > 0: # just for html pages!
             dojo_type_re = re.compile('\sdojoType\s*\=\s*[\'\"]([\w\d\.\-\_]*)[\'\"]\s*')
             unique_dojo_modules = set(dojo_type_re.findall(response.content)) # we just need each module once
-            tail, sep, head = response.content.rpartition("</body>")
-            response.content = "%(tail)s%(script)s%(sep)s%(head)s" % {
-                'tail':tail,
-                'script':'<script type="text/javascript">\n%s\n</script>\n' % self._get_dojo_requires(unique_dojo_modules),
-                'sep':sep,
-                'head':head,
-            }
+            if len(unique_dojo_modules) > 0:
+                tail, sep, head = smart_unicode(response.content).rpartition("</body>")
+                response.content = "%(tail)s%(script)s%(sep)s%(head)s" % {
+                    'tail':tail,
+                    'script':'<script type="text/javascript">\n%s\n</script>\n' % self._get_dojo_requires(unique_dojo_modules),
+                    'sep':sep,
+                    'head':head,
+                }
         return response
 
     def _get_dojo_requires(self, dojo_modules):
