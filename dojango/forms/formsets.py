@@ -70,5 +70,6 @@ class BaseFormSet(BaseFormSet):
             
 def formset_factory(*args, **kwargs):
     """Formset factory function that uses the dojango BaseFormSet"""
-    kwargs["formset"] = BaseFormSet
+    if not kwargs.has_key("formset"):
+        kwargs["formset"] = BaseFormSet
     return django_formset_factory(*args, **kwargs)
