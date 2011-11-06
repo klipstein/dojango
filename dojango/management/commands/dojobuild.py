@@ -120,7 +120,9 @@ class Command(BaseCommand):
             exe_command = os.path.splitdrive(buildscript_dir)[0] + ' && ' + exe_command
         
         # do the build
-        os.system(exe_command)
+        exit_code = os.system(exe_command)
+        if exit_code: # != 0
+            sys.exit(1) # dojobuild exits because of shrinksafe error
         if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
             if minify or minify_extreme:
                 self._dojo_mini_after_build()
@@ -190,6 +192,7 @@ see: http://dojotoolkit.org/license for details
                 os.remove("%s/dojo/tests.js" % self.dojo_release_dir)
         except Exception, e:
             print e
+            sys.exit(1)
         # cleanup from above, refs #6616
         shutil.move("%s/util/buildscripts/_copyright.txt" % self.dojo_base_dir, "%s/util/buildscripts/copyright.txt" % self.dojo_base_dir)
         shutil.move("%s/util/buildscripts/_build_notice.txt" % self.dojo_base_dir, "%s/util/buildscripts/build_notice.txt" % self.dojo_base_dir)
@@ -268,6 +271,7 @@ see: http://dojotoolkit.org/license for details
                             pass
         except Exception, e:
             print e
+            sys.exit(1)
 
     DOJO_ZIP_SPECIAL = {'dojox': ['form', 'widget', 'grid']} # these modules will be zipped separately
     def _dojo_prepare_zipserve(self):
