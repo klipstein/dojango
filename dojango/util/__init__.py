@@ -16,8 +16,11 @@ try:
     # we need it, if we want to serialize query- and model-objects
     # of google appengine within json_encode
     from google import appengine
+    # allow serialization of mongodb ObjectIds
+    from pymongo.objectid import ObjectId
 except:
     appengine = None
+    ObjectId = None
 
 try:
     # this is just available since django version 1.0
@@ -124,6 +127,8 @@ def json_encode(data):
             ret = _model(data)
         elif appengine and isinstance(data, appengine.ext.db.Model):
             ret = _googleModel(data)
+        elif isinstance(data, ObjectId):
+            ret = str(data)
         # here we need to encode the string as unicode (otherwise we get utf-16 in the json-response)
         elif isinstance(data, basestring):
             ret = unicode(data)
