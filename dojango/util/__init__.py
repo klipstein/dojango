@@ -127,7 +127,7 @@ def json_encode(data):
             ret = _model(data)
         elif appengine and isinstance(data, appengine.ext.db.Model):
             ret = _googleModel(data)
-        elif isinstance(data, ObjectId):
+        elif ObjectId and isinstance(data, ObjectId):
             ret = str(data)
         # here we need to encode the string as unicode (otherwise we get utf-16 in the json-response)
         elif isinstance(data, basestring):
