@@ -298,8 +298,14 @@ class MultiWidget(DojoWidgetMixin, widgets.MultiWidget):
 
 class SplitDateTimeWidget(widgets.SplitDateTimeWidget):
     "DateTimeInput is using two input fields."
-    date_format = DateInput.format
-    time_format = TimeInput.format
+    try:
+        # for older django versions 
+        date_format = DateInput.format
+        time_format = TimeInput.format
+    except AttributeError:
+        date_format = None
+        time_format = None
+
 
     def __init__(self, attrs=None, date_format=None, time_format=None):
         if date_format:
