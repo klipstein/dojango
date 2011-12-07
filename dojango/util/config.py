@@ -52,7 +52,7 @@ class Config:
         ret['THEME_CSS_URL'] = self.theme_css_url()
         ret['THEME'] = settings.DOJO_THEME
         ret['BASE_MEDIA_URL'] = settings.BASE_MEDIA_URL
-        ret['DOJO_BASE_PATH'] = '%s/dojo/' % self.dojo_base_path()
+        ret['DOJO_BASE_PATH'] = self.version > '1.6' and self.dojo_base_path() or '%s/dojo/' % self.dojo_base_path()
         ret['DOJO_URL'] = self.dojo_url()
         ret['DIJIT_URL'] = self.dijit_url()
         ret['DOJOX_URL'] = self.dojox_url()
