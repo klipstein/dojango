@@ -19,9 +19,11 @@
 			,'dojoBlankHtmlUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
 			,'dojoIframeHistoryUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
 		{% endif %}
-		{% if DOJANGO.CDN_USE_SSL and not DOJANGO.IS_LOCAL %}
+		{% if DOJANGO.VERSION > '1.6' %}
+			,'paths':{'dojo': '{{ DOJANGO.DOJO_URL }}', 'dijit': '{{ DOJANGO.DIJIT_URL }}', 'dojox': '{{ DOJANGO.DOJOX_URL }}'}
+		{% else %}{% if DOJANGO.CDN_USE_SSL and not DOJANGO.IS_LOCAL %}
 			,'modulePaths':{'dojo': '{{ DOJANGO.DOJO_URL }}', 'dijit': '{{ DOJANGO.DIJIT_URL }}', 'dojox': '{{ DOJANGO.DOJOX_URL }}'}
-		{% endif %}
+		{% endif %}{% endif %}
 	};
 </script>
 {% block _dojango_post_dj_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
