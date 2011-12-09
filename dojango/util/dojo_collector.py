@@ -11,11 +11,12 @@ def activate():
     """
     class Collector:
         used_dojo_modules = []
+        use_async = False
 
         def add(self, module):
             # just add a module once!
             if not module in self.used_dojo_modules:
-                self.used_dojo_modules.append(module)
+                self.used_dojo_modules.append(self.use_async and module.replace(".", "/") or module)
 
     _active.value = Collector()
 
@@ -36,8 +37,10 @@ def get_collector():
             return None
     return None
 
-def get_modules():
+def get_modules(async=False):
     collector = get_collector()
+    # FIXME: hacky assignment.
+    collector.use_async = async
     if collector is not None:
         return collector.used_dojo_modules
     return []
