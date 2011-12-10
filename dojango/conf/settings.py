@@ -32,14 +32,13 @@ CDN_USE_SSL = getattr(settings, "DOJANGO_CDN_USE_SSL", False) # is dojo served v
 # - use_gfx: there is a special case, when using dojox.gfx from aol (see http://dev.aol.com/dojo)
 # - is_local: marks a profile being local. this is needed when using the dojo module loader
 # - is_local_build: profile being a locally builded version
-# - async: since dojo 1.7.0 you can use the pure async loader
 _aol_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2', '1.4', '1.4.0', '1.4.1', '1.4.3', '1.5', '1.5.0', '1.6', '1.6.0')
 _aol_gfx_versions = ('0.9.0', '1.0.0', '1.0.2', '1.1.0', '1.1.1',)
 _google_xd_versions = ('1.1.1', '1.2', '1.2.0', '1.2.3', '1.3', '1.3.0', '1.3.1', '1.3.2', '1.4', '1.4.0', '1.4.1', '1.4.3', '1.5', '1.5.0', '1.6', '1.6.0', '1.6.1')
 _google_versions = ('1.7.0',) # since Dojo 1.7.0 an alternative loading mechanism is in place
 DOJO_PROFILES = {
-    'google': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_amd':DOJO_USE_AMD_LOADER, 'versions':_google_versions},
-    'google_uncompressed': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_amd':DOJO_USE_AMD_LOADER, 'uncompressed':True, 'versions':_google_versions},
+    'google': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'versions':_google_versions},
+    'google_uncompressed': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'uncompressed':True, 'versions':_google_versions},
     'google_xd': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'versions':_google_xd_versions}, # google just supports version >= 1.1.1
     'google_uncompressed_xd': {'base_url':(CDN_USE_SSL and 'https' or 'http') + '://ajax.googleapis.com/ajax/libs/dojo', 'use_xd':True, 'uncompressed':True, 'versions':_google_xd_versions},
     'aol': {'base_url':'http://o.aolcdn.com/dojo', 'use_xd':True, 'versions':_aol_versions},

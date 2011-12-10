@@ -47,7 +47,7 @@ class Config:
         ret['IS_LOCAL'] = self.config.get("is_local", False)
         ret['UNCOMPRESSED'] = self.config.get("uncompressed", False)
         ret['USE_GFX'] = self.config.get("use_gfx", False)
-        ret['USE_AMD'] = self.config.get("use_amd", False)
+        ret['USE_AMD'] = settings.DOJO_USE_AMD_LOADER
         ret['VERSION'] = self.version
         # preparing all dojo related urls here
         ret['THEME_CSS_URL'] = self.theme_css_url()
@@ -60,7 +60,7 @@ class Config:
         ret['DOJO_SRC_FILE'] = self.dojo_src_file()
         ret['DOJANGO_SRC_FILE'] = self.dojango_src_file()
         ret['DEBUG'] = settings.DOJO_DEBUG
-        ret['COLLECTOR'] = dojo_collector.get_modules(ret['USE_AMD'])
+        ret['COLLECTOR'] = dojo_collector.get_modules()
         ret['CDN_USE_SSL'] = settings.CDN_USE_SSL
         # adding all installed dojo-media namespaces
         ret.update(self.dojo_media_urls())
