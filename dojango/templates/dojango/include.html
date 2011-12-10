@@ -10,31 +10,27 @@
     @Import "{{ DOJANGO.THEME_CSS_URL }}";
 </style>
 <script type="text/javascript">
-    {# baseUrl setting is needed, if you want to combine a local with a remote build! #}
-	var {% if DOJANGO.VERSION > '1.6' %}dojoConfig{% else %}djConfig{% endif %} = {
-		'isDebug':{{ DOJANGO.DEBUG|json }},
-		'parseOnLoad':true,
-		'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
-		{% if DOJANGO.USE_ASYNC %}
-		,'async': true
-		{% endif %}
-		{% if not DOJANGO.IS_LOCAL %}
+	{# baseUrl setting is needed, if you want to combine a local with a remote build! #}
+	{% block _dojango_dojo_config %}
+		var {% if DOJANGO.VERSION > '1.6' %}dojoConfig{% else %}djConfig{% endif %} = {
+			'isDebug':{{ DOJANGO.DEBUG|json }},
+			'parseOnLoad': true,
+			'baseUrl':"{{ DOJANGO.DOJO_BASE_PATH }}"
+			{% if DOJANGO.USE_AMD %},'async': true{% endif %}
+			{% if not DOJANGO.IS_LOCAL %}
 			,'dojoBlankHtmlUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
 			,'dojoIframeHistoryUrl':"{{ DOJANGO.DOJANGO_URL }}/resources/blank.html"
-		{% endif %}
-		{% if DOJANGO.VERSION > '1.6' %}
+			{% endif %}
+			{% if DOJANGO.VERSION > '1.6' %}
 			,'cacheBust': new Date()
 			,'packages':[{'name': 'dojo', 'location': '{{ DOJANGO.DOJO_URL }}'}, {'name': 'dijit', 'location': '{{ DOJANGO.DIJIT_URL }}'}, {'name': 'dojox', 'location': '{{ DOJANGO.DOJOX_URL }}'}]
-		{% else %}{% if DOJANGO.CDN_USE_SSL and not DOJANGO.IS_LOCAL %}
+			{% else %}{% if DOJANGO.CDN_USE_SSL and not DOJANGO.IS_LOCAL %}
 			,'modulePaths':{'dojo': '{{ DOJANGO.DOJO_URL }}', 'dijit': '{{ DOJANGO.DIJIT_URL }}', 'dojox': '{{ DOJANGO.DOJOX_URL }}'}
-		{% endif %}{% endif %}
-	};
+			{% endif %}{% endif %}
+		};
+	{% endblock %}
 </script>
-{% block _dojango_post_dj_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
-{% block dojango_post_dj_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
+{% block _dojango_post_dojo_config %}{# don't use this block, it is used by include_i18n.html #}{% endblock %}
+{% block dojango_post_dojo_config %}{# if you want to manipulate djConfig stuff #}{% endblock %}
 <script type="text/javascript" src="{{ DOJANGO.DOJO_SRC_FILE }}">
 </script>
-{# for a local builded version dojango should already be included #}
-{% if not DOJANGO.IS_LOCAL_BUILD %}
-    <script type="text/javascript" src="{{ DOJANGO.DOJANGO_SRC_FILE }}"></script>
-{% endif %}
