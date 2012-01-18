@@ -184,8 +184,8 @@ class BaseModelFormSet(BaseModelFormSet, BaseFormSet):
 
 def modelformset_factory(*args, **kwargs):
     """Changed modelformset_factory function, where we use our own formfield_callback"""
-    kwargs["formfield_callback"] = formfield_function
-    kwargs["formset"] = BaseModelFormSet
+    kwargs["formfield_callback"] = kwargs.get("formfield_callback", formfield_function)
+    kwargs["formset"] = kwargs.get("formset", BaseModelFormSet)
     return models.modelformset_factory(*args, **kwargs)
 
 # InlineFormSets #############################################################
@@ -207,6 +207,6 @@ class BaseInlineFormSet(BaseInlineFormSet, BaseModelFormSet):
             
 def inlineformset_factory(*args, **kwargs):
     """Changed inlineformset_factory function, where we use our own formfield_callback"""
-    kwargs["formfield_callback"] = formfield_function
-    kwargs["formset"] = BaseInlineFormSet
+    kwargs["formfield_callback"] = kwargs.get("formfield_callback", formfield_function)
+    kwargs["formset"] = kwargs.get("formset", BaseInlineFormSet)
     return models.inlineformset_factory(*args, **kwargs)
