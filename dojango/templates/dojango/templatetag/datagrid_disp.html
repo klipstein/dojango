@@ -31,6 +31,7 @@ dojo.addOnLoad(function(){
         store:dojango._datagrid._stores.{{id}}, 
         structure:{{id}}_layout, {% if selection_mode %} selectionMode:'{{ selection_mode }}', {% endif %}
         canSort:{{id}}_noSort
+        {% if sortInfo %},sortInfo:{{sortInfo|safe}}{% endif %}
         {% if query %},query:{{query|safe}}{% endif %}
         {% if rowsPerPage %},rowsPerPage:{{rowsPerPage|json}}{% endif %}
         {% if delayScroll %},delayScroll:{{delayScroll|json}}{% endif %}
