@@ -2,7 +2,7 @@ from django.conf import settings
 from dojango.conf import settings as dojango_settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils._os import safe_join
-from django.conf.urls.defaults import patterns
+from django.conf.urls import patterns
 from os import path, listdir
 
 def find_app_dir(app_name):
