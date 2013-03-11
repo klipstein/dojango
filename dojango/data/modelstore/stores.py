@@ -1,4 +1,5 @@
-from django.utils import simplejson
+import json
+
 from django.utils.encoding import smart_unicode
 from django.core.paginator import Paginator
 
@@ -283,10 +284,10 @@ class BaseStore(object):
                     The list (or any iterable, ie QuerySet) of objects that will
                     fill the store.
 
-                All other args and kwargs are passed to simplejson.dumps
+                All other args and kwargs are passed to json.dumps
         """
         objects = kwargs.pop('objects', None)
-        return simplejson.dumps( self.to_python(objects), *args, **kwargs )
+        return json.dumps( self.to_python(objects), *args, **kwargs )
 
     def _start_serialization(self):
         """ Called when serialization of the store begins
