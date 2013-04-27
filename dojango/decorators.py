@@ -1,5 +1,5 @@
+import json
 from django.http import HttpResponseNotAllowed, HttpResponseServerError
-from django.utils import simplejson as json
 
 from util import to_json_response
 from util import to_dojo_data

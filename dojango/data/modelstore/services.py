@@ -1,5 +1,5 @@
 import sys, inspect
-from django.utils import simplejson
+import json
 from exceptions import ServiceException
 
 def servicemethod(*args, **kwargs):
@@ -183,13 +183,13 @@ class JsonService(BaseService):
         else:
             response = self.get_smd(request.get_full_path())
 
-        return simplejson.dumps(response)
+        return json.dumps(response)
 
     def process_request(self, request):
         """ Handle the request
         """
         try:
-            data = simplejson.loads(request.raw_post_data)
+            data = json.loads(request.raw_post_data)
             id, method_name, params = data["id"], data["method"], data["params"]
 
         # Doing a blanket except here because God knows kind of crazy
