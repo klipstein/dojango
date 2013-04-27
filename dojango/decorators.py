@@ -1,4 +1,8 @@
-import json
+from django import VERSION as django_version
+if django_version >= (1, 5, 0):
+    import json
+else:
+    from django.utils import simplejson as json
 from django.http import HttpResponseNotAllowed, HttpResponseServerError
 
 from util import to_json_response

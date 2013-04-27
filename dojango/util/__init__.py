@@ -1,7 +1,12 @@
 import os
 import datetime
-import json
 from decimal import Decimal
+
+from django import VERSION as django_version
+if django_version >= (1, 5, 0):
+    import json
+else:
+    from django.utils import simplejson as json
 
 from dojango.conf import settings # using the app-specific settings
 from django.core.serializers.json import DateTimeAwareJSONEncoder

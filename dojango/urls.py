@@ -1,4 +1,8 @@
-from django.conf.urls import patterns, url
+from django import VERSION as django_version
+if django_version >= (1, 5, 0):
+    from django.conf.urls import patterns, url
+else:
+    from django.conf.urls.defaults import *
 from django.conf import settings
 
 from dojango.util import media
