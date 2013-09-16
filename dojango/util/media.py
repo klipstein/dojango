@@ -3,6 +3,7 @@ from django.conf import settings
 from dojango.conf import settings as dojango_settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils._os import safe_join
+from django.utils.encoding import force_str
 if django_version >= (1, 5, 0):
     from django.conf.urls import patterns
 else:
@@ -21,7 +22,7 @@ def find_app_dir(app_name):
         if a is None:
             mod = __import__(m, {}, {}, [])
         else:
-            mod = getattr(__import__(m, {}, {}, [a]), a)
+            mod = getattr(__import__(m, {}, {}, [force_str(a)]), a)
         return path.dirname(path.abspath(mod.__file__))
     except ImportError, e:
         raise ImproperlyConfigured, 'ImportError %s: %s' % (app_name, e.args[0])
