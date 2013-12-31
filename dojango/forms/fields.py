@@ -61,8 +61,12 @@ class TypedChoiceField(DojoFieldMixin, fields.TypedChoiceField):
     widget = widgets.Select
 
 class IntegerField(DojoFieldMixin, fields.IntegerField):
-    widget = widgets.NumberTextInput
     decimal_places = 0
+
+    def __init__(self, *args, **kwargs):
+        if 'widget' not in kwargs:
+            kwargs['widget'] = widgets.NumberTextInput
+        super(IntegerField, self).__init__(*args, **kwargs)
 
 class BooleanField(DojoFieldMixin, fields.BooleanField):
     widget = widgets.CheckboxInput
