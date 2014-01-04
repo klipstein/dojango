@@ -7,19 +7,18 @@ from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from setuptools import setup, find_packages
 
-
 def read(*parts):
     filename = os.path.join(os.path.dirname(__file__), *parts)
     with codecs.open(filename, encoding='utf-8') as fp:
         return fp.read()
-
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
     if version_match:
-        return version_match.group(1)
+        # using a non-unicode string (http://bugs.python.org/issue11638)
+        return str(version_match.group(1))
     raise RuntimeError("Unable to find version string.")
 
 
