@@ -110,11 +110,12 @@ leading ``./``), and all searching is case-insensitive.
 setup(
     name="dojango",
     version=find_version("dojango", "__init__.py"),
-    url = 'http://code.google.com/p/dojango/',
-    license='License :: OSI Approved :: MIT License',
-    description = 'Reusable django application that helps you to use the client-side framework dojo',
-    keywords = 'dojo,django,dojango,javascript',
-    author = 'Tobias von Klipstein',
+    url='http://code.google.com/p/dojango/',
+    license='License :: OSI Approved :: BSD License',
+    description='Reusable django application that helps you to use the client-side framework dojo',
+    long_description=read('README'),
+    keywords='dojo,django,dojango,javascript',
+    author='Tobias von Klipstein',
     author_email='tk@uxebu.com',
     packages=find_packages(),
     package_data=find_package_data(),
@@ -124,5 +125,5 @@ setup(
         "Framework :: Django",
         "Environment :: Web Environment",
     ],
-    zip_safe=False,
+    zip_safe=False
 )
