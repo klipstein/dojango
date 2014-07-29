@@ -15,6 +15,9 @@ except ImportError:
     class CommandError(Exception):
         pass
 
+def version_tuple(s):
+    return tuple([int(x) for x in s.split(".")])
+
 class Command(BaseCommand):
     '''This command is used to create your own dojo build. To start a build, you just
     have to type:
@@ -73,7 +76,7 @@ class Command(BaseCommand):
         except:
             raise CommandError('Please install java. You need it for building dojo.')
         buildscript_dir = os.path.abspath('%s/buildscripts' % util_base_dir)
-        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+        if version_tuple(settings.DOJO_BUILD_USED_VERSION) < (1,2,0):
             executable = '%(java_exec)s -jar ../shrinksafe/custom_rhino.jar build.js' % \
                          {'java_exec':settings.DOJO_BUILD_JAVA_EXEC}
         else:
@@ -96,11 +99,11 @@ class Command(BaseCommand):
         release_dir = os.path.abspath(os.path.join(self.dojo_release_dir, "../"))
         # the build command handling is so different between the versions!
         # sometimes we need to add /, sometimes not :-(
-        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+        if version_tuple(settings.DOJO_BUILD_USED_VERSION) < (1,2,0):
             release_dir = release_dir + os.path.sep
         # setting up the build command
         build_addons = ""
-        if settings.DOJO_BUILD_USED_VERSION >= '1.2.0':
+        if version_tuple(settings.DOJO_BUILD_USED_VERSION) >= (1,2,0):
             # since version 1.2.0 there is an additional commandline option that does the mini build (solved within js!)
             build_addons = "mini=true"
         exe_command = 'cd "%(buildscript_dir)s" && %(executable)s version=%(version)s releaseName="%(version)s" releaseDir="%(release_dir)s" %(options)s %(build_addons)s' % \
@@ -114,7 +117,7 @@ class Command(BaseCommand):
         minify = options['minify']
         minify_extreme = options['minify_extreme']
         prepare_zipserve = options['prepare_zipserve']
-        if settings.DOJO_BUILD_USED_VERSION < '1.2.0' and (minify or minify_extreme):
+        if (version_tuple(settings.DOJO_BUILD_USED_VERSION) < (1,2,0)) and (minify or minify_extreme):
             self._dojo_mini_before_build()
         if sys.platform == 'win32': # fixing issue #39, if dojango is installed on a different drive
             exe_command = os.path.splitdrive(buildscript_dir)[0] + ' && ' + exe_command
@@ -123,7 +126,7 @@ class Command(BaseCommand):
         exit_code = os.system(exe_command)
         if exit_code: # != 0
             sys.exit(1) # dojobuild exits because of shrinksafe error
-        if settings.DOJO_BUILD_USED_VERSION < '1.2.0':
+        if version_tuple(settings.DOJO_BUILD_USED_VERSION) < (1,2,0):
             if minify or minify_extreme:
                 self._dojo_mini_after_build()
         if minify_extreme:
