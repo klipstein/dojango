@@ -1,5 +1,8 @@
 import os
+
 from django.conf import settings
+from dojango.version import version_tuple
+
 
 DEBUG = getattr(settings, "DEBUG", False)
 DEFAULT_CHARSET = getattr(settings, 'DEFAULT_CHARSET', 'utf-8')
@@ -73,10 +76,10 @@ DOJO_BUILD_PROFILE = getattr(settings, "DOJANGO_DOJO_BUILD_PROFILE", "dojango")
 #                              this tupel will be appended to the default folders/files that are skipped: see SKIP_FILES in management/commands/dojobuild.py 
 DOJO_BUILD_PROFILES = {
     'dojango': {
-        'options': (DOJO_VERSION > '1.6' and 'profile' or 'profileFile') + '="%(BASE_MEDIA_ROOT)s/dojango.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
+        'options': (version_tuple(DOJO_VERSION) > (1,6) and 'profile' or 'profileFile') + '="%(BASE_MEDIA_ROOT)s/dojango.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
     },
     'dojango_optimized': {
-        'options': (DOJO_VERSION > '1.6' and 'profile' or 'profileFile') + '="%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
+        'options': (version_tuple(DOJO_VERSION) > (1,6) and 'profile' or 'profileFile') + '="%(BASE_MEDIA_ROOT)s/dojango_optimized.profile.js" action=release optimize=shrinksafe.keepLines cssOptimize=comments.keepLines',
         'build_version': '%(DOJO_BUILD_VERSION)s-dojango-optimized-with-dojo',
     },
 }

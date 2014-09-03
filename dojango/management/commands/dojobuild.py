@@ -1,11 +1,13 @@
 from optparse import make_option
-
 import os
 import re
 import shutil
 import subprocess # since python 2.4
 import sys
+
 from dojango.conf import settings
+from dojango.version import version_tuple
+
 
 try:
     from django.core.management.base import BaseCommand, CommandError
@@ -14,9 +16,6 @@ except ImportError:
     BaseCommand = object
     class CommandError(Exception):
         pass
-
-def version_tuple(s):
-    return tuple([int(x) for x in s.split(".")])
 
 class Command(BaseCommand):
     '''This command is used to create your own dojo build. To start a build, you just

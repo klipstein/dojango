@@ -8,11 +8,11 @@ from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 from django.utils import datetime_safe
-
 from dojango.util import json_encode
+from dojango.version import version_tuple
 from dojango.util.config import Config
-
 from dojango.util import dojo_collector
+
 
 __all__ = (
     'Media', 'MediaDefiningClass', # original django classes
@@ -229,11 +229,11 @@ if TimeInput:
         ]
         manual_format = True
         format = "T%H:%M:%S" # special for dojo: 'T12:12:33'
-        
+
         def __init__(self, attrs=None, format=None):
             # always passing the dojo time format
             super(TimeInput, self).__init__(attrs, format=self.format)
-        
+
         def _has_changed(self, initial, data):
             try:
                 input_format = self.format
@@ -269,14 +269,14 @@ class CheckboxInput(DojoWidgetMixin, widgets.CheckboxInput):
     dojo_type = 'dijit.form.CheckBox'
 
 class Select(DojoWidgetMixin, widgets.Select):
-    dojo_type = dojo_config.version < '1.4' and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
-    valid_extra_attrs = dojo_config.version < '1.4' and \
+    dojo_type = version_tuple(dojo_config.version) < (1,4) and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
+    valid_extra_attrs = version_tuple(dojo_config.version) < (1,4) and \
         ['required', 'help_text',] or \
         ['required',]
 
 class NullBooleanSelect(DojoWidgetMixin, widgets.NullBooleanSelect):
-    dojo_type = dojo_config.version < '1.4' and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
-    valid_extra_attrs = dojo_config.version < '1.4' and \
+    dojo_type = version_tuple(dojo_config.version) < (1,4) and 'dijit.form.FilteringSelect' or 'dijit.form.Select'
+    valid_extra_attrs = version_tuple(dojo_config.version) < (1,4) and \
         ['required', 'help_text',] or \
         ['required',]
 
@@ -290,7 +290,7 @@ class RadioSelect(DojoWidgetMixin, widgets.RadioSelect):
     dojo_type = 'dijit.form.RadioButton'
 
     def __init__(self, *args, **kwargs):
-        if dojo_config.version < '1.3':
+        if version_tuple(dojo_config.version) < (1,3):
             self.alt_require = 'dijit.form.CheckBox'
         super(RadioSelect, self).__init__(*args, **kwargs)
 
@@ -303,7 +303,7 @@ class MultiWidget(DojoWidgetMixin, widgets.MultiWidget):
 class SplitDateTimeWidget(widgets.SplitDateTimeWidget):
     "DateTimeInput is using two input fields."
     try:
-        # for older django versions 
+        # for older django versions
         date_format = DateInput.format
         time_format = TimeInput.format
     except AttributeError:
@@ -357,7 +357,7 @@ class HorizontalSliderInput(TextInput):
     }
 
     def __init__(self, attrs=None):
-        if dojo_config.version < '1.3':
+        if version_tuple(dojo_config.version) < (1,3):
             self.alt_require = 'dijit.form.Slider'
         super(HorizontalSliderInput, self).__init__(attrs)
 
@@ -395,7 +395,7 @@ class EmailTextInput(ValidationTextInput):
     js_regex_func = "dojox.validate.regexp.emailAddress"
 
     def __init__(self, attrs=None):
-        if dojo_config.version < '1.3':
+        if version_tuple(dojo_config.version) < (1,3):
             self.js_regex_func = 'dojox.regexp.emailAddress'
         super(EmailTextInput, self).__init__(attrs)
 
@@ -406,7 +406,7 @@ class IPAddressTextInput(ValidationTextInput):
     js_regex_func = "dojox.validate.regexp.ipAddress"
 
     def __init__(self, attrs=None):
-        if dojo_config.version < '1.3':
+        if version_tuple(dojo_config.version) < (1,3):
             self.js_regex_func = 'dojox.regexp.ipAddress'
         super(IPAddressTextInput, self).__init__(attrs)
 
@@ -417,7 +417,7 @@ class URLTextInput(ValidationTextInput):
     js_regex_func = "dojox.validate.regexp.url"
 
     def __init__(self, attrs=None):
-        if dojo_config.version < '1.3':
+        if version_tuple(dojo_config.version) < (1,3):
             self.js_regex_func = 'dojox.regexp.url'
         super(URLTextInput, self).__init__(attrs)
 
@@ -476,7 +476,7 @@ class DropDownSelect(Select):
 class CheckedMultiSelect(SelectMultiple):
     dojo_type = 'dojox.form.CheckedMultiSelect'
     valid_extra_attrs = []
-    # TODO: fix attribute multiple=multiple 
+    # TODO: fix attribute multiple=multiple
     # seems there is a dependency in dojox.form.CheckedMultiSelect for dijit.form.MultiSelect,
     # but CheckedMultiSelect is not extending that
 
@@ -491,7 +491,7 @@ class ComboBox(DojoWidgetMixin, widgets.Select):
     """Nearly the same as FilteringSelect, but ignoring the option value."""
     dojo_type = 'dijit.form.ComboBox'
     valid_extra_attrs = [
-        'required', 
+        'required',
         'help_text',
     ]
 
@@ -501,20 +501,20 @@ class FilteringSelect(ComboBox):
 class ComboBoxStore(TextInput):
     """A combobox that is receiving data from a given dojo data url.
     As default dojo.data.ItemFileReadStore is used. You can overwrite
-    that behaviour by passing a different store name 
+    that behaviour by passing a different store name
     (e.g. dojox.data.QueryReadStore).
     Usage:
         ComboBoxStore("/dojo-data-store-url/")
     """
     dojo_type = 'dijit.form.ComboBox'
     valid_extra_attrs = [
-        'required', 
+        'required',
         'help_text',
     ]
     store = 'dojo.data.ItemFileReadStore'
     store_attrs = {}
     url = None
-    
+
     def __init__(self, url, attrs=None, store=None, store_attrs={}):
         self.url = url
         if store:
@@ -523,7 +523,7 @@ class ComboBoxStore(TextInput):
             self.store_attrs = store_attrs
         self.extra_dojo_require.append(self.store)
         super(ComboBoxStore, self).__init__(attrs)
-    
+
     def render(self, name, value, attrs=None):
         if value is None: value = ''
         store_id = self.get_store_id(getattr(attrs, "id", None), name)
@@ -545,7 +545,7 @@ class ComboBoxStore(TextInput):
 
 class FilteringSelectStore(ComboBoxStore):
     dojo_type = 'dijit.form.FilteringSelect'
-    
+
 class ListInput(DojoWidgetMixin, widgets.TextInput):
     dojo_type = 'dojox.form.ListInput'
     class Media:
