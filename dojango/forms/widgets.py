@@ -3,7 +3,7 @@ import time
 
 from django.forms import *
 from django.utils import formats
-from django.utils.encoding import StrAndUnicode, force_unicode
+from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
